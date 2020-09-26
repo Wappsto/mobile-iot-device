@@ -1,8 +1,7 @@
-import 'network.dart';
-import 'value.dart';
 import 'package:uuid/uuid.dart';
-import '../wappsto.dart';
-
+import 'package:mobile_iot_device/models/network.dart';
+import 'package:mobile_iot_device/models/value.dart';
+import 'package:mobile_iot_device/wappsto.dart';
 
 class Device {
   final String id;

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:connectivity/connectivity.dart';
-import 'models/sensor.dart';
-import 'models/device.dart';
-import 'models/value.dart';
-import 'models/state.dart';
+import 'package:mobile_iot_device/models/sensor.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/value.dart';
+import 'package:mobile_iot_device/models/state.dart';
 
 class WifiSensor extends Sensor {
   Value _value;
@@ -22,7 +22,10 @@ class WifiSensor extends Sensor {
       data = await Connectivity().getWifiName();
     }
 
-    _value.update(data);
+    if(_value != null) {
+      _value.update(data);
+    }
+
     text = "$data";
     call();
   }

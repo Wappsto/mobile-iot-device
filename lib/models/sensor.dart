@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'device.dart';
+import 'package:mobile_iot_device/models/device.dart';
 
 abstract class Sensor {
+  SharedPreferences _prefs;
   StreamSubscription _subscription;
   Function _cb;
-  String _sensorText = "";
+  String _sensorText = "Idle";
   String _name = "";
   IconData _icon;
+  bool _enabled = true;
 
   StreamSubscription get subscription {
     return _subscription;
@@ -15,6 +18,12 @@ abstract class Sensor {
 
   void set subscription(StreamSubscription sub) {
     _subscription = sub;
+  }
+
+  void run() {
+    if(_enabled) {
+      start();
+    }
   }
 
   void stop() {
@@ -28,8 +37,14 @@ abstract class Sensor {
     }
   }
 
-  void setCallback(Function cb) {
+  void setup(Function cb, SharedPreferences prefs) {
     _cb = cb;
+    _prefs = prefs;
+
+    _enabled = _prefs.getBool("${name}_enabled");
+    if(_enabled == null) {
+      _enabled = false;
+    }
   }
 
   void call() {
@@ -40,6 +55,10 @@ abstract class Sensor {
 
   void set text(String txt) {
     _sensorText = txt;
+  }
+
+  String toString() {
+    return _sensorText;
   }
 
   void set icon(IconData icon) {
@@ -58,8 +77,29 @@ abstract class Sensor {
     return _name;
   }
 
-  String toString() {
-    return _sensorText;
+  void set enabled(bool enabled) {
+    if(_enabled == enabled) {
+      return;
+    }
+
+    _enabled = enabled;
+    _prefs.setBool("${name}_enabled", _enabled);
+
+    if(_enabled) {
+      start();
+    } else {
+      stop();
+    }
+  }
+
+  bool get enabled {
+    return _enabled;
+  }
+
+  void toggleEnabled() {
+    print("Toggle ${_enabled}");
+    enabled = !_enabled;
+    print("Toggle ${_enabled}");
   }
 
   void start();

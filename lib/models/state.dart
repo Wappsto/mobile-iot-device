@@ -1,4 +1,4 @@
-import 'value.dart';
+import 'package:mobile_iot_device/models/value.dart';
 import 'dart:convert';
 
 enum StateType {
@@ -12,9 +12,7 @@ class State {
   String _type;
   String data;
   String timestamp;
-  DateTime last_update;
   Value parent;
-  bool increace_update = false;
 
   State({this.id, this.type, this.timestamp, this.data, this.parent = null}) {
     _type = type == StateType.Report ? "Report" : "Control";
@@ -34,18 +32,8 @@ class State {
   }
 
   void update(String newData) {
-    var tmp = DateTime.now();
-    bool forceUpdate = false;
-    if(increace_update && int.parse(newData) > int.parse(data)) {
-      forceUpdate = true;
-    }
     data = newData;
-    timestamp = tmp.toUtc().toIso8601String();
-
-    if(forceUpdate || last_update == null || tmp.difference(last_update).inMinutes >= 1) {
-      parent.wappsto.updateState(this);
-      last_update = tmp;
-    }
+    timestamp = DateTime.now().toUtc().toIso8601String();
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +55,10 @@ class State {
 
   String get url {
     return "${parent.url}/state/${id}";
+  }
+
+  String get state_data {
+    return data;
   }
 
   String toString() {

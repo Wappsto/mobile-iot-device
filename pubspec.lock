@@ -86,12 +86,12 @@ packages:
     source: hosted
     version: "0.3.1"
   connectivity_macos:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: connectivity_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0+3"
+    version: "0.1.0+5"
   connectivity_platform_interface:
     dependency: transitive
     description:
@@ -127,13 +127,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.2+4"
-  devicetemperature:
-    dependency: "direct main"
-    description:
-      name: devicetemperature
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.1"
   equatable:
     dependency: transitive
     description:
@@ -167,6 +160,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_compass:
+    dependency: "direct main"
+    description:
+      name: flutter_compass
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.3"
   flutter_login:
     dependency: "direct main"
     description:
@@ -174,6 +174,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.14"
+  flutter_signin_button:
+    dependency: "direct main"
+    description:
+      name: flutter_signin_button
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -380,6 +387,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.3"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.24.1"
   sensors:
     dependency: "direct main"
     description:

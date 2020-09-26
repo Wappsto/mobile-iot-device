@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'dart:async';
-import 'models/sensor.dart';
-import 'models/device.dart';
-import 'models/value.dart';
-import 'models/state.dart';
+import 'package:mobile_iot_device/models/sensor.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/value.dart';
+import 'package:mobile_iot_device/models/state.dart';
 
 class NoiseSensor extends Sensor {
   NoiseMeter _noiseMeter = new NoiseMeter();
@@ -43,11 +43,16 @@ class NoiseSensor extends Sensor {
       _noiseMean = mean;
       _noiseMax = max;
 
-      _value.update(mean);
+      if(_value != null) {
+        _value.update(mean);
+      }
 
       print(noiseReading.meanDecibel);
       if(noiseReading.meanDecibel.isFinite) {
-        _rawValue.update(noiseReading.meanDecibel.toInt().toString());
+        if(_rawValue != null) {
+          _rawValue.update(noiseReading.meanDecibel.toInt().toString());
+        }
+
         text = "${mean} (${noiseReading.meanDecibel.toInt().toString()} db)";
         call();
       } else {

@@ -1,22 +1,33 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'models/session.dart';
-import 'models/creator.dart';
+import 'package:mobile_iot_device/models/session.dart';
+import 'package:mobile_iot_device/models/creator.dart';
 
-Future<String> fetchFromWappsto(String url, {Map jsonData, Session session}) async {
+final String host = 'https://wappsto.com/services';
+
+Future<String> fetchFromWappsto(String url, {Map jsonData, String session}) async {
   final client = new HttpClient();
   HttpClientRequest request;
 
-  if(jsonData != null) {
-    request = await client.postUrl(Uri.parse(url))
-    ..headers.contentType = ContentType.json
-    ..write(jsonEncode(jsonData));
-  } else if(session != null) {
-    request = await client.getUrl(Uri.parse(url))
-    ..headers.set('x-session', session.id);
+  if(session != null) {
+    if(jsonData != null) {
+      request = await client.postUrl(Uri.parse(url))
+      ..headers.contentType = ContentType.json
+      ..headers.set('x-session', session)
+      ..write(jsonEncode(jsonData));
+    } else {
+      request = await client.getUrl(Uri.parse(url))
+      ..headers.set('x-session', session);
+    }
   } else {
-    request = await client.getUrl(Uri.parse(url));
+    if(jsonData != null) {
+      request = await client.postUrl(Uri.parse(url))
+      ..headers.contentType = ContentType.json
+      ..write(jsonEncode(jsonData));
+    } else {
+      request = await client.getUrl(Uri.parse(url));
+    }
   }
 
   HttpClientResponse response = await request.close();
@@ -34,20 +45,22 @@ Future<String> fetchFromWappsto(String url, {Map jsonData, Session session}) asy
 }
 
 Future<Session> fetchSession(String username, String password) async {
-  String url = 'https://wappsto.com/services/2.0/session';
+  String url = "${host}/2.0/session";
   Map jsonData = {
     'username': username,
     'password': password,
   };
   final data = await fetchFromWappsto(url, jsonData: jsonData);
+  print(data);
   return Session.fromJson(json.decode(data));
 }
 
 Future<List<Creator> > fetchCreator(Session session) async {
-  String url = 'https://wappsto.com/services/2.0/creator?expand=1';
+  String url = "${host}/2.0/creator?expand=1";
 
-  final data = await fetchFromWappsto(url, session: session);
+  final data = await fetchFromWappsto(url, session: session.id);
   final list = json.decode(data);
+
   List<Creator> creators = new List<Creator>();
   list.forEach((elm) => {
       creators.add(Creator.fromJson(elm))
@@ -55,9 +68,23 @@ Future<List<Creator> > fetchCreator(Session session) async {
   return creators;
 }
 
-Future<Session> validateSession(String id) async {
-  String url = 'https://wappsto.com/services/2.0/session/${id}';
+Future<Creator> createCreator(Session session) async {
+  String url = "${host}/2.1/creator";
+  Map jsonData = {};
+  final data = await fetchFromWappsto(url, jsonData: jsonData, session: session.id);
+  print(data);
+  return Creator.fromJson(json.decode(data));
+}
 
-  final data = await fetchFromWappsto(url);
-  return Session.fromJson(json.decode(data));
+Future<Session> validateSession(String id) async {
+  String url = "${host}/2.0/session/${id}";
+
+  try {
+    final data = await fetchFromWappsto(url, session: id);
+    return Session.fromJson(json.decode(data));
+  } catch(e) {
+    print("Session is not valied");
+  }
+
+  return null;
 }

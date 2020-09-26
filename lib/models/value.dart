@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
-import 'device.dart';
-import 'state.dart';
-import '../wappsto.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/state.dart';
+import 'package:mobile_iot_device/wappsto.dart';
 
 enum ValuePermission {
   ReadOnly,
@@ -15,13 +15,19 @@ class Value {
   String type;
   ValuePermission permission;
   String _permission;
+  int period;
+  int delta;
+
   Map<String, dynamic> number = null;
   Map<String, dynamic> string = null;
 
   Device parent;
   List<State> states;
 
-  Value({this.id, this.name, this.type, this.permission, this.states = null, this.parent = null}) {
+  bool increace_update = false;
+  DateTime last_update;
+
+  Value({this.id, this.name, this.type, this.permission, this.period, this.delta, this.states = null, this.parent = null}) {
     states = new List<State>();
 
     switch(permission) {
@@ -61,6 +67,8 @@ class Value {
       name: json['name'],
       type: json['type'],
       permission: per,
+      period: json['period'],
+      delta: json['delta'],
       states: new List<State>(),
       parent: parent,
     );
@@ -89,6 +97,8 @@ class Value {
       'name': name,
       'type': type,
       'permission': _permission,
+      'period': period,
+      'delta': delta,
       'state': stas,
     };
 
@@ -129,8 +139,32 @@ class Value {
   void update(String newData) {
     State state = states.singleWhere((s) => s.type == StateType.Report, orElse: () => null);
     if(state != null) {
-      print("Updating $name with $newData");
+      var tmp = DateTime.now();
+      bool deltaUpdate = false;
+      bool periodUpdate = false;
+
+      try {
+        if(delta != null && int.parse(newData) > int.parse(state.state_data)) {
+          deltaUpdate = true;
+        } else if(newData != state.state_data) {
+          deltaUpdate = true;
+        }
+      } catch(e) {
+        print("Failed to convert ${newData} or ${state.state_data} to int");
+      }
+
+      if(period != null && tmp.difference(last_update).inSeconds >= period) {
+        periodUpdate = true;
+      }
+
       state.update(newData);
+
+      if(last_update == null || deltaUpdate || periodUpdate) {
+        print("Updating $name with $newData (${last_update == null} ${deltaUpdate} ${periodUpdate})");
+        wappsto.updateState(state);
+        last_update = tmp;
+      }
+
     } else {
       print("Failed to find report state for $name");
     }

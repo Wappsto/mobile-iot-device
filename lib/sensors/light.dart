@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:light/light.dart';
-import 'models/sensor.dart';
-import 'models/device.dart';
-import 'models/value.dart';
-import 'models/state.dart';
+import 'package:mobile_iot_device/models/sensor.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/value.dart';
+import 'package:mobile_iot_device/models/state.dart';
 
 class LightSensor extends Sensor {
   Light _light;
@@ -18,7 +18,10 @@ class LightSensor extends Sensor {
   void onData(int luxValue) async {
     print("Lux value from Light Sensor: $luxValue");
 
-    _value.update(luxValue.toString());
+    if(_value != null) {
+      _value.update(luxValue.toString());
+    }
+
     text = "$luxValue lux";
     call();
   }

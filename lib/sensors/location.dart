@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
-import 'models/sensor.dart';
-import 'models/device.dart';
-import 'models/value.dart';
-import 'models/state.dart';
+import 'package:mobile_iot_device/models/sensor.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/value.dart';
+import 'package:mobile_iot_device/models/state.dart';
 
 class LocationSensor extends Sensor {
   Value _longValue;
@@ -31,8 +31,13 @@ class LocationSensor extends Sensor {
 
     _geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
         print("Got position");
-        _longValue.update(position.longitude.toString());
-        _latValue.update(position.latitude.toString());
+
+        if(_longValue != null) {
+          _longValue.update(position.longitude.toString());
+        }
+        if(_latValue != null) {
+          _latValue.update(position.latitude.toString());
+        }
         text = "${position.latitude}, ${position.longitude}";
         call();
     });

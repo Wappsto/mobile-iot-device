@@ -4,20 +4,20 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:convert';
 
-import 'rest.dart';
-import 'wappsto.dart';
-import 'models/session.dart';
-import 'models/creator.dart';
-import 'models/sensor.dart';
-import 'models/network.dart';
-import 'models/device.dart';
-import 'lux.dart';
-import 'noise.dart';
-import 'location.dart';
-import 'wifi.dart';
-import 'accelerometer.dart';
-import 'gyroscope.dart';
-import 'activity.dart';
+import 'package:mobile_iot_device/rest.dart';
+import 'package:mobile_iot_device/wappsto.dart';
+import 'package:mobile_iot_device/models/session.dart';
+import 'package:mobile_iot_device/models/creator.dart';
+import 'package:mobile_iot_device/models/sensor.dart';
+import 'package:mobile_iot_device/models/network.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/sensors/light.dart';
+import 'package:mobile_iot_device/sensors/noise.dart';
+import 'package:mobile_iot_device/sensors/location.dart';
+import 'package:mobile_iot_device/sensors/wifi.dart';
+import 'package:mobile_iot_device/sensors/accelerometer.dart';
+import 'package:mobile_iot_device/sensors/gyroscope.dart';
+//import 'package:mobile_iot_device/sensors/compass.dart';
 
 class Manager {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -27,25 +27,38 @@ class Manager {
   var state;
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   Map<String, dynamic> deviceData;
+  bool _connected = false;
 
   Manager({this.state});
 
-  void setup() async {
+  Future<bool> setup() async {
+    print("Manager Setup");
+    _connected = false;
+    final SharedPreferences prefs = await _prefs;
+
     _sensors.add(new NoiseSensor());
     _sensors.add(new LightSensor());
     _sensors.add(new LocationSensor());
     _sensors.add(new WifiSensor());
     _sensors.add(new AccelerometerSensor());
     _sensors.add(new GyroscopeSensor());
-    _sensors.add(new ActivitySensor());
+    //_sensors.add(new CompassSensor());
 
-    _sensors.forEach((s) => s.setCallback(update));
+    _sensors.forEach((s) => s.setup(update, prefs));
 
     initPlatformState();
 
-    await connect();
+    _connected = await connect();
 
-    start();
+    if(_connected) {
+      start();
+    }
+
+    return _connected;
+  }
+
+  bool get connected {
+    return _connected;
   }
 
   List<Sensor> get sensors {
@@ -54,7 +67,7 @@ class Manager {
 
   void start() async {
     print("Starting");
-    _sensors.forEach((s) => s.start());
+    _sensors.forEach((s) => s.run());
   }
 
   void stop() async {
@@ -66,8 +79,11 @@ class Manager {
     });
   }
 
-  void connect() async {
+  Future<bool> connect() async {
     List<String> certs = await loadCerts();
+    if(certs == null) {
+      return false;
+    }
     String ca = certs[0];
     String cert = certs[1];
     String key = certs[2];
@@ -101,6 +117,7 @@ class Manager {
     }
 
     print("Done connect");
+    return true;
   }
 
   Future<List<String> > loadCerts() async {
@@ -109,14 +126,19 @@ class Manager {
 
     if(ca == "") {
       final str_session = prefs.getString("session");
-      final session = new Session(id: str_session);
-      final creators = await fetchCreator(session);
+      print(str_session);
+      final session = await validateSession(str_session);
+      print(session);
+      if(session == null) {
+        prefs.remove("session");
+        return null;
+      }
 
-      Creator c = creators[0];
-
-      prefs.setString("ca", c.ca);
-      prefs.setString("certificate", c.certificate);
-      prefs.setString("private_key", c.private_key);
+      final creator = await createCreator(session);
+      print(creator);
+      prefs.setString("ca", creator.ca);
+      prefs.setString("certificate", creator.certificate);
+      prefs.setString("private_key", creator.private_key);
     } else {
       print("Loading from prefs");
     }

@@ -4,11 +4,11 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:convert';
 
-import 'splash.dart';
-import 'custom_route.dart';
-import 'login.dart';
-import 'dashboard.dart';
-import 'transition_route_observer.dart';
+import 'package:mobile_iot_device/splash.dart';
+import 'package:mobile_iot_device/utils/custom_route.dart';
+import 'package:mobile_iot_device/login.dart';
+import 'package:mobile_iot_device/dashboard.dart';
+import 'package:mobile_iot_device/utils/transition_route_observer.dart';
 
 
 void main() {

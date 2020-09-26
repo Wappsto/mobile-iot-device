@@ -5,11 +5,11 @@ import 'dart:convert';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:basic_utils/basic_utils.dart';
 
-import 'SecureSocketChannel.dart';
-import 'models/network.dart';
-import 'models/device.dart';
-import 'models/value.dart';
-import 'models/state.dart';
+import 'package:mobile_iot_device/SecureSocketChannel.dart';
+import 'package:mobile_iot_device/models/network.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/value.dart';
+import 'package:mobile_iot_device/models/state.dart';
 
 void myIsolate(SendPort isolateToMainStream) {
   ReceivePort mainToIsolateStream = ReceivePort();
@@ -21,7 +21,6 @@ void myIsolate(SendPort isolateToMainStream) {
   List<List<dynamic> > waitQueue = null;
 
   Future<dynamic> sendToRPC(List<dynamic> data) async {
-    print("Sending");
     var res = null;
     try {
       if(data[2] is String) {
@@ -29,8 +28,6 @@ void myIsolate(SendPort isolateToMainStream) {
       } else {
         res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': data[2]});
       }
-      print("recv");
-      print(res);
     } catch(e) {
       print("ISO ERROR");
       print(e);
@@ -39,16 +36,12 @@ void myIsolate(SendPort isolateToMainStream) {
   }
 
   mainToIsolateStream.listen((data) async {
-      print(data);
-
       if(data is List) {
         if(data.length == 5) {
-          print("Connection");
           SecureSocketChannel socket = new SecureSocketChannel(host: data[0], port: data[1], ca: data[2], cert: data[3], key: data[4]);
           socket.connect().then((conn) {
               connected = true;
               ready = true;
-              print("Connected $conn");
               _rpc = Peer(socket.cast<String>());
 
               _rpc.registerMethod('PUT', (Parameters params) {
@@ -63,7 +56,6 @@ void myIsolate(SendPort isolateToMainStream) {
                   Uri url = params['url'].asUri;
                   String id = url.pathSegments.last;
 
-                  print("GET $id");
                   return true;
               });
 
@@ -92,8 +84,6 @@ void myIsolate(SendPort isolateToMainStream) {
         }
       }
   });
-
-  isolateToMainStream.send('This is from myIsolate()');
 }
 
 class Wappsto {
@@ -111,7 +101,6 @@ class Wappsto {
   Future<void> connect() async {
     mainToIsolateStream = await initIsolate();
 
-    print("Sending connect to wappsto");
     mainToIsolateStream.send([host, port, ca, cert, key]);
   }
 
@@ -137,7 +126,9 @@ class Wappsto {
   }
 
   Future<dynamic> rawSend(List<String> cmd) {
-    mainToIsolateStream.send(cmd);
+    if(mainToIsolateStream != null) {
+      mainToIsolateStream.send(cmd);
+    }
   }
 
   Future<SendPort> initIsolate() async {

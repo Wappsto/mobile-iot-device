@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:sensors/sensors.dart';
-import 'models/sensor.dart';
-import 'models/device.dart';
-import 'models/value.dart';
-import 'models/state.dart';
+import 'package:mobile_iot_device/models/sensor.dart';
+import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/value.dart';
+import 'package:mobile_iot_device/models/state.dart';
 
 class GyroscopeSensor extends Sensor {
   Value _valueX;
@@ -17,12 +17,15 @@ class GyroscopeSensor extends Sensor {
   }
 
   void onData(GyroscopeEvent event) async {
-
-    //print("Gyroscope Event: $event");
-
-    _valueX.update(event.x.toInt().toString());
-    _valueY.update(event.y.toInt().toString());
-    _valueZ.update(event.z.toInt().toString());
+    if(_valueX != null) {
+      _valueX.update(event.x.toInt().toString());
+    }
+    if(_valueY != null) {
+      _valueY.update(event.y.toInt().toString());
+    }
+    if(_valueZ != null) {
+      _valueZ.update(event.z.toInt().toString());
+    }
 
     text = "X: ${event.x.toInt()} Y: ${event.y.toInt()} Z: ${event.z.toInt()}";
     call();
