@@ -24,7 +24,7 @@ class CompassSensor extends Sensor {
     int value = compassValue.toInt();
     String dir = "";
 
-    dir = _headings[((compassValue + 11.25) / 22.5).toInt()];
+    dir = _headings[(compassValue + 11.25) ~/ 22.5];
 
     if(_value != null) {
       _value.update(value.toString());

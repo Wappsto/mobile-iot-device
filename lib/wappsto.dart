@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:basic_utils/basic_utils.dart';
 
-import 'package:mobile_iot_device/SecureSocketChannel.dart';
+import 'package:mobile_iot_device/utils/SecureSocketChannel.dart';
 import 'package:mobile_iot_device/models/network.dart';
 import 'package:mobile_iot_device/models/state.dart';
 

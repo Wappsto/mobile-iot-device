@@ -48,7 +48,7 @@ class LocationSensor extends Sensor {
           text = "No Location Data";
         } else {
           subscription = getPositionStream(desiredAccuracy: LocationAccuracy.high).listen(onData);
-        };
+        }
     });
   }
 

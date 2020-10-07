@@ -2,17 +2,15 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:mobile_iot_device/wappsto.dart';
+import 'package:mobile_iot_device/rest.dart';
+import 'package:mobile_iot_device/models/network.dart';
 
-import '../lib/wappsto.dart';
-import '../lib/rest.dart';
-import '../lib/models/network.dart';
-
-import '../lib/SecureSocketChannel.dart';
 
 void main() async {
-  var load_from_server = !await File('ca.pem').exists();
+  var loadFromServer = !await File('ca.pem').exists();
 
-  if(load_from_server) {
+  if(loadFromServer) {
     final session = await fetchSession('', '');
 
     print(session);
@@ -36,29 +34,6 @@ void main() async {
   String key = await File('key.pem').readAsString();
   String host = "collector.wappsto.com";
   int port = 443;
-
-  /*
-  SecureSocketChannel socket = new SecureSocketChannel(host: host, port: port, ca: ca, cert: cert, key: key);
-  socket.connect().then((conn) async {
-      print(conn);
-      print(socket.sock);
-      //socket.sock.listen((data) {
-      //    print("recv");
-      //    print(new String.fromCharCodes(data).trim());
-      //});
-
-      socket.stream.listen((data) {
-          print("recv");
-          print(data);
-      });
-
-      //socket.sock.add(utf8.encode('{"jsonrpc":"2.0","method":"PUT","id":1,"params":{"url":"/network/c4023bbd-7a34-44a5-bd75-5e32db712e05/device/6b8fc3f2-f293-4d0e-b6cf-ab4f2e9030e7/value/bf2885ab-6ca0-4bd2-9444-da2271d54c52/state/9ab5bb53-ba54-4e74-8c54-523e0b4f5937","data":{"meta": {"id": "9ab5bb53-ba54-4e74-8c54-523e0b4f5937", "version": "2.0", "type": "state"}, "type": "Report", "timestamp": "2020-08-21T18:48:05.777152Z", "data": "SOFT"}}}'));
-      //var res = await socket.sock.flush();
-      //print(res);
-
-      socket.sink.add('{"jsonrpc":"2.0","method":"PUT","id":1,"params":{"url":"/network/c4023bbd-7a34-44a5-bd75-5e32db712e05/device/6b8fc3f2-f293-4d0e-b6cf-ab4f2e9030e7/value/bf2885ab-6ca0-4bd2-9444-da2271d54c52/state/9ab5bb53-ba54-4e74-8c54-523e0b4f5937","data":{"meta": {"id": "9ab5bb53-ba54-4e74-8c54-523e0b4f5937", "version": "2.0", "type": "state"}, "type": "Report", "timestamp": "2020-08-21T18:48:05.777152Z", "data": "SOFT"}}}');
-  });
-      */
 
 
 

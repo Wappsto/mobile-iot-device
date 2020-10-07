@@ -12,8 +12,8 @@ import 'package:mobile_iot_device/utils/custom_route.dart';
 import 'package:mobile_iot_device/dashboard.dart';
 import 'package:mobile_iot_device/rest.dart';
 
-final String fb_client_id = "2562179333883383";
-final String fb_redirect_url = "https://wappsto-941e8.firebaseapp.com/__/auth/handler";
+final String fbClientId = "2562179333883383";
+final String fbRedirectUrl = "https://wappsto-941e8.firebaseapp.com/__/auth/handler";
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -191,7 +191,7 @@ class LoginScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => CustomWebView(
           selectedUrl:
-          'https://www.facebook.com/dialog/oauth?client_id=$fb_client_id&redirect_uri=$fb_redirect_url&response_type=token&scope=email,public_profile,',
+          'https://www.facebook.com/dialog/oauth?client_id=$fbClientId&redirect_uri=$fbRedirectUrl&response_type=token&scope=email,public_profile,',
         ),
         maintainState: true),
     );
