@@ -5,32 +5,24 @@ import 'package:mobile_iot_device/models/device.dart';
 
 abstract class Sensor {
   SharedPreferences _prefs;
-  StreamSubscription _subscription;
+  StreamSubscription subscription;
   Function _cb;
   String _sensorText = "Idle";
-  String _name = "";
-  IconData _icon;
-  bool _enabled = true;
-
-  StreamSubscription get subscription {
-    return _subscription;
-  }
-
-  void set subscription(StreamSubscription sub) {
-    _subscription = sub;
-  }
+  String name = "";
+  IconData icon;
+  bool enabled = true;
 
   void run() {
-    if(_enabled) {
+    if(enabled) {
       start();
     }
   }
 
   void stop() {
     try {
-      if (_subscription != null) {
-        _subscription.cancel();
-        _subscription = null;
+      if (subscription != null) {
+        subscription.cancel();
+        subscription = null;
       }
     } catch (err) {
       print('Sensor stop error: $err');
@@ -41,9 +33,9 @@ abstract class Sensor {
     _cb = cb;
     _prefs = prefs;
 
-    _enabled = _prefs.getBool("${name}_enabled");
-    if(_enabled == null) {
-      _enabled = false;
+    enabled = _prefs.getBool("${name}_enabled");
+    if(enabled == null) {
+      enabled = false;
     }
   }
 
@@ -53,7 +45,7 @@ abstract class Sensor {
     }
   }
 
-  void set text(String txt) {
+  set text(String txt) {
     _sensorText = txt;
   }
 
@@ -61,45 +53,23 @@ abstract class Sensor {
     return _sensorText;
   }
 
-  void set icon(IconData icon) {
-    _icon = icon;
-  }
-
-  IconData get icon {
-    return _icon;
-  }
-
-  void set name(String name) {
-    _name = name;
-  }
-
-  String get name {
-    return _name;
-  }
-
-  void set enabled(bool enabled) {
-    if(_enabled == enabled) {
+  set enable(bool enabled) {
+    if(this.enabled == enabled) {
       return;
     }
 
-    _enabled = enabled;
-    _prefs.setBool("${name}_enabled", _enabled);
+    this.enabled = enabled;
+    _prefs.setBool("${name}_enabled", enabled);
 
-    if(_enabled) {
+    if(enabled) {
       start();
     } else {
       stop();
     }
   }
 
-  bool get enabled {
-    return _enabled;
-  }
-
   void toggleEnabled() {
-    print("Toggle ${_enabled}");
-    enabled = !_enabled;
-    print("Toggle ${_enabled}");
+    this.enable = !this.enabled;
   }
 
   void start();

@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:mobile_iot_device/rest.dart';
 import 'package:mobile_iot_device/wappsto.dart';
 import 'package:mobile_iot_device/models/session.dart';
-import 'package:mobile_iot_device/models/creator.dart';
 import 'package:mobile_iot_device/models/sensor.dart';
 import 'package:mobile_iot_device/models/network.dart';
 import 'package:mobile_iot_device/models/device.dart';
@@ -17,7 +16,9 @@ import 'package:mobile_iot_device/sensors/location.dart';
 import 'package:mobile_iot_device/sensors/wifi.dart';
 import 'package:mobile_iot_device/sensors/accelerometer.dart';
 import 'package:mobile_iot_device/sensors/gyroscope.dart';
-//import 'package:mobile_iot_device/sensors/compass.dart';
+//import 'package:mobile_iot_device/sensors/magnetometer.dart';
+import 'package:mobile_iot_device/sensors/compass.dart';
+import 'package:mobile_iot_device/sensors/battery.dart';
 
 class Manager {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -32,7 +33,6 @@ class Manager {
   Manager({this.state});
 
   Future<bool> setup() async {
-    print("Manager Setup");
     _connected = false;
     final SharedPreferences prefs = await _prefs;
 
@@ -42,7 +42,9 @@ class Manager {
     _sensors.add(new WifiSensor());
     _sensors.add(new AccelerometerSensor());
     _sensors.add(new GyroscopeSensor());
-    //_sensors.add(new CompassSensor());
+    //_sensors.add(new MagnetometerSensor());
+    _sensors.add(new CompassSensor());
+    _sensors.add(new BatterySensor());
 
     _sensors.forEach((s) => s.setup(update, prefs));
 
@@ -66,7 +68,6 @@ class Manager {
   }
 
   void start() async {
-    print("Starting");
     _sensors.forEach((s) => s.run());
   }
 
@@ -96,12 +97,11 @@ class Manager {
     try {
       await wappsto.connect();
 
-      print("Connected");
+      print("Connected to Wappsto on $host:$port");
 
       network = await createNetwork();
 
-      var res = await wappsto.postNetwork(network);
-      print(res);
+      await wappsto.postNetwork(network);
 
       start();
     } catch(e, backtrace) {
@@ -116,7 +116,6 @@ class Manager {
       //print(e.data);
     }
 
-    print("Done connect");
     return true;
   }
 
@@ -125,22 +124,18 @@ class Manager {
     var ca = prefs.getString('ca') ?? "";
 
     if(ca == "") {
-      final str_session = prefs.getString("session");
-      print(str_session);
-      final session = await validateSession(str_session);
-      print(session);
+      print("Loading new certificates from Wappsto");
+      final String strSession = prefs.getString("session");
+      final Session session = await validateSession(strSession);
       if(session == null) {
         prefs.remove("session");
         return null;
       }
 
       final creator = await createCreator(session);
-      print(creator);
       prefs.setString("ca", creator.ca);
       prefs.setString("certificate", creator.certificate);
-      prefs.setString("private_key", creator.private_key);
-    } else {
-      print("Loading from prefs");
+      prefs.setString("private_key", creator.privateKey);
     }
 
     return [prefs.getString("ca"), prefs.getString("certificate"), prefs.getString("private_key")];

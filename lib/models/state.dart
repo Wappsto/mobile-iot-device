@@ -14,7 +14,7 @@ class State {
   String timestamp;
   Value parent;
 
-  State({this.id, this.type, this.timestamp, this.data, this.parent = null}) {
+  State({this.id, this.type, this.timestamp, this.data, this.parent}) {
     _type = type == StateType.Report ? "Report" : "Control";
     if(timestamp == null) {
       timestamp = new DateTime.now().toUtc().toIso8601String();
@@ -54,14 +54,10 @@ class State {
   }
 
   String get url {
-    return "${parent.url}/state/${id}";
-  }
-
-  String get state_data {
-    return data;
+    return "${parent.url}/state/$id";
   }
 
   String toString() {
-    return "State '${type}' (${id})";
+    return "State '$type' ($id)";
   }
 }

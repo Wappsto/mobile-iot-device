@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Session {
   final String id;
   final String username;
@@ -14,6 +12,6 @@ class Session {
   }
 
   String toString() {
-    return "Session ${id} for ${username}";
+    return "Session $id for $username";
   }
 }

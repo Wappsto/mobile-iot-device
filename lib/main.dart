@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
-import 'dart:math';
-import 'dart:convert';
 
 import 'package:mobile_iot_device/splash.dart';
-import 'package:mobile_iot_device/utils/custom_route.dart';
 import 'package:mobile_iot_device/login.dart';
 import 'package:mobile_iot_device/dashboard.dart';
 import 'package:mobile_iot_device/utils/transition_route_observer.dart';

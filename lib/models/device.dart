@@ -6,18 +6,18 @@ import 'package:mobile_iot_device/wappsto.dart';
 class Device {
   final String id;
   final String name;
-  String manufacturer = null;
-  String product = null;
-  String version = null;
-  String serial = null;
-  String description = null;
-  String protocol = null;
-  String communication = null;
+  String manufacturer;
+  String product;
+  String version;
+  String serial;
+  String description;
+  String protocol;
+  String communication;
 
-  Network parent = null;
+  Network parent;
   List<Value> values;
 
-  Device({this.id, this.name, this.values = null, this.parent = null}) {
+  Device({this.id, this.name, this.values, this.parent}) {
     values = new List<Value>();
   }
 
@@ -152,10 +152,10 @@ class Device {
   }
 
   String get url {
-    return "${parent.url}/device/${id}";
+    return "${parent.url}/device/$id";
   }
 
   String toString() {
-    return "Device '${name}' (${id})";
+    return "Device '$name' ($id)";
   }
 }

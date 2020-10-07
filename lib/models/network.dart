@@ -9,7 +9,7 @@ class Network {
   Wappsto _wappsto;
   List<Device> devices;
 
-  Network({this.id, this.name, Wappsto wappsto, this.devices = null}) {
+  Network({this.id, this.name, Wappsto wappsto, this.devices}) {
     _wappsto = wappsto;
   }
 
@@ -81,10 +81,10 @@ class Network {
   }
 
   String get url {
-    return "/network/${id}";
+    return "/network/$id";
   }
 
   String toString() {
-    return "Network '${name}' (${id})";
+    return "Network '$name' ($id)";
   }
 }

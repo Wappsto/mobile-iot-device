@@ -40,23 +40,31 @@ Future<String> fetchFromWappsto(String url, {Map jsonData, String session}) asyn
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
-    throw Exception("Failed to load data from Wappsto ${response.statusCode}: ${url}");
+    throw Exception("Failed to load data from Wappsto ${response.statusCode}: $url");
   }
 }
 
 Future<Session> fetchSession(String username, String password) async {
-  String url = "${host}/2.0/session";
+  String url = "$host/2.1/session";
   Map jsonData = {
     'username': username,
     'password': password,
   };
   final data = await fetchFromWappsto(url, jsonData: jsonData);
-  print(data);
+  return Session.fromJson(json.decode(data));
+}
+
+Future<Session> firebaseSession(String token) async {
+  String url = "$host/2.1/session";
+  Map jsonData = {
+    'firebase_token': token
+  };
+  final data = await fetchFromWappsto(url, jsonData: jsonData);
   return Session.fromJson(json.decode(data));
 }
 
 Future<List<Creator> > fetchCreator(Session session) async {
-  String url = "${host}/2.0/creator?expand=1";
+  String url = "$host/2.1/creator?expand=1";
 
   final data = await fetchFromWappsto(url, session: session.id);
   final list = json.decode(data);
@@ -69,21 +77,22 @@ Future<List<Creator> > fetchCreator(Session session) async {
 }
 
 Future<Creator> createCreator(Session session) async {
-  String url = "${host}/2.1/creator";
-  Map jsonData = {};
+  String url = "$host/2.1/creator";
+  Map jsonData = {
+    'product': 'Mobile IoT Device'
+  };
   final data = await fetchFromWappsto(url, jsonData: jsonData, session: session.id);
-  print(data);
   return Creator.fromJson(json.decode(data));
 }
 
 Future<Session> validateSession(String id) async {
-  String url = "${host}/2.0/session/${id}";
+  String url = "$host/2.0/session/$id";
 
   try {
     final data = await fetchFromWappsto(url, session: id);
     return Session.fromJson(json.decode(data));
   } catch(e) {
-    print("Session is not valied");
+    print("Session is not valid");
   }
 
   return null;

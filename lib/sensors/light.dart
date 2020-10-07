@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:light/light.dart';
 import 'package:mobile_iot_device/models/sensor.dart';
 import 'package:mobile_iot_device/models/device.dart';
@@ -37,17 +36,13 @@ class LightSensor extends Sensor {
   }
 
   void linkValue(Device device) {
-    _value = device.findValue(name: 'Light Sensor');
+    _value = device.findValue(name: 'Light');
     if(_value == null) {
-      _value = device.createNumberValue('Light Sensor', 'Light', 0, 5000, 1, 'lux');
+      _value = device.createNumberValue('Light', 'illuminance', 0, 100000, 1, 'lx');
       _value.createState(StateType.Report, data: "0");
-    } else {
-      _value.setType('Light');
-      _value.number['min'] = 0;
-      _value.number['max'] = 5000;
-      _value.number['step'] = 1;
-      _value.number['unit'] = 'lux';
     }
+
+    _value.setDelta(10);
   }
 
 }

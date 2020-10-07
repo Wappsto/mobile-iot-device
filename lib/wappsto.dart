@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:convert';
@@ -7,21 +6,17 @@ import 'package:basic_utils/basic_utils.dart';
 
 import 'package:mobile_iot_device/SecureSocketChannel.dart';
 import 'package:mobile_iot_device/models/network.dart';
-import 'package:mobile_iot_device/models/device.dart';
-import 'package:mobile_iot_device/models/value.dart';
 import 'package:mobile_iot_device/models/state.dart';
 
 void myIsolate(SendPort isolateToMainStream) {
   ReceivePort mainToIsolateStream = ReceivePort();
   isolateToMainStream.send(mainToIsolateStream.sendPort);
   Peer _rpc;
-  Wappsto _wappsto = null;
-  bool connected = false;
   bool ready = false;
-  List<List<dynamic> > waitQueue = null;
+  List<List<dynamic> > waitQueue;
 
   Future<dynamic> sendToRPC(List<dynamic> data) async {
-    var res = null;
+    var res;
     try {
       if(data[2] is String) {
         res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': json.decode(data[2])});
@@ -36,53 +31,51 @@ void myIsolate(SendPort isolateToMainStream) {
   }
 
   mainToIsolateStream.listen((data) async {
-      if(data is List) {
-        if(data.length == 5) {
-          SecureSocketChannel socket = new SecureSocketChannel(host: data[0], port: data[1], ca: data[2], cert: data[3], key: data[4]);
-          socket.connect().then((conn) {
-              connected = true;
-              ready = true;
-              _rpc = Peer(socket.cast<String>());
-
-              _rpc.registerMethod('PUT', (Parameters params) {
-                  Uri url = params['url'].asUri;
-                  String data = params['data'].asString;
-                  String id = url.pathSegments.last;
-
-                  return true;
-              });
-
-              _rpc.registerMethod('GET', (Parameters params) {
-                  Uri url = params['url'].asUri;
-                  String id = url.pathSegments.last;
-
-                  return true;
-              });
-
-
-              _rpc.listen();
-          });
-        } else if(!ready) {
-          if(waitQueue == null) {
-            waitQueue = new List<List<dynamic> >();
-          }
-          waitQueue.add(data);
-        } else if (data.length == 3) {
-          if(_rpc != null) {
-            ready = false;
-            await sendToRPC(data);
-
-            while(waitQueue != null) {
-              var tmp = waitQueue;
-              waitQueue = null;
-              for(int i=0; i<tmp.length; i++) {
-                var res = await sendToRPC(tmp[i]);
-              }
-            }
+    if(data is List) {
+      if(data.length == 5) {
+        SecureSocketChannel socket = new SecureSocketChannel(host: data[0], port: data[1], ca: data[2], cert: data[3], key: data[4]);
+        socket.connect().then((conn) {
             ready = true;
+            _rpc = Peer(socket.cast<String>());
+
+            _rpc.registerMethod('PUT', (Parameters params) {
+                // Uri url = params['url'].asUri;
+                // String data = params['data'].asString;
+                // String id = url.pathSegments.last;
+
+                return false;
+            });
+
+            _rpc.registerMethod('GET', (Parameters params) {
+                // Uri url = params['url'].asUri;
+                // String id = url.pathSegments.last;
+
+                return false;
+            });
+
+            _rpc.listen();
+        });
+      } else if(!ready) {
+        if(waitQueue == null) {
+          waitQueue = new List<List<dynamic> >();
+        }
+        waitQueue.add(data);
+      } else if (data.length == 3) {
+        if(_rpc != null) {
+          ready = false;
+          await sendToRPC(data);
+
+          while(waitQueue != null) {
+            var tmp = waitQueue;
+            waitQueue = null;
+            for(int i=0; i<tmp.length; i++) {
+              await sendToRPC(tmp[i]);
+            }
           }
+          ready = true;
         }
       }
+    }
   });
 }
 
@@ -113,19 +106,19 @@ class Wappsto {
     return _network;
   }
 
-  Future<dynamic> postNetwork(Network network) async {
+  Future<void> postNetwork(Network network) async {
     _network = network;
 
     List<String> cmd = ['POST', '/network', network.toJsonString()];
     rawSend(cmd);
   }
 
-  Future<dynamic> updateState(State state) async {
+  Future<void> updateState(State state) async {
     List<String> cmd = ['PUT', state.url, state.toJsonString()];
     rawSend(cmd);
   }
 
-  Future<dynamic> rawSend(List<String> cmd) {
+  void rawSend(List<String> cmd) {
     if(mainToIsolateStream != null) {
       mainToIsolateStream.send(cmd);
     }
@@ -143,14 +136,15 @@ class Wappsto {
           print('[isolateToMainStream] $data');
         }
     });
+
     try {
-      Isolate myIsolateInstance = await Isolate.spawn(myIsolate, isolateToMainStream.sendPort);
+      await Isolate.spawn(myIsolate, isolateToMainStream.sendPort);
       return completer.future;
     } catch(e, backtrace) {
       print("ISO ERR");
       print(e);
       print(backtrace);
+      return null;
     }
   }
-
 }

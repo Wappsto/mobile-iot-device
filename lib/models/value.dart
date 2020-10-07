@@ -16,19 +16,36 @@ class Value {
   ValuePermission permission;
   String _permission;
   int period;
-  int delta;
+  double delta;
 
-  Map<String, dynamic> number = null;
-  Map<String, dynamic> string = null;
+  Map<String, dynamic> number;
+  Map<String, dynamic> string;
 
   Device parent;
   List<State> states;
 
-  bool increace_update = false;
-  DateTime last_update;
+  DateTime lastUpdate;
 
-  Value({this.id, this.name, this.type, this.permission, this.period, this.delta, this.states = null, this.parent = null}) {
+  Value({this.id, this.name, this.type, this.permission, String period, String delta, this.states, this.parent}) {
     states = new List<State>();
+
+    if(period != null) {
+      try {
+        this.period = int.parse(period);
+      } catch(e) {
+        print("Failed to parse period ($period) for $name");
+      }
+    } else {
+      this.period = 60;
+    }
+
+    if(delta != null) {
+      try {
+        this.delta = double.parse(delta);
+      } catch(e) {
+        print("Failed to parse delta ($delta) for $name");
+      }
+    }
 
     switch(permission) {
       case ValuePermission.ReadOnly: {
@@ -97,10 +114,16 @@ class Value {
       'name': name,
       'type': type,
       'permission': _permission,
-      'period': period,
-      'delta': delta,
       'state': stas,
     };
+
+    if(period != null) {
+      val['period'] = period.toString();
+    }
+
+    if(delta != null) {
+      val['delta'] = delta.toString();
+    }
 
     if(number != null) {
       val['number'] = number;
@@ -136,7 +159,7 @@ class Value {
     return state;
   }
 
-  void update(String newData) {
+  bool update(String newData) {
     State state = states.singleWhere((s) => s.type == StateType.Report, orElse: () => null);
     if(state != null) {
       var tmp = DateTime.now();
@@ -144,30 +167,41 @@ class Value {
       bool periodUpdate = false;
 
       try {
-        if(delta != null && int.parse(newData) > int.parse(state.state_data)) {
-          deltaUpdate = true;
-        } else if(newData != state.state_data) {
+        if(delta != null) {
+          if((double.parse(newData) - double.parse(state.data)).abs() >= delta) {
+            print("Delta update: ${(double.parse(newData) - double.parse(state.data)).abs()} >= $delta");
+            deltaUpdate = true;
+          }
+        } else if(newData != state.data) {
           deltaUpdate = true;
         }
       } catch(e) {
-        print("Failed to convert ${newData} or ${state.state_data} to int");
+        print("Failed to convert $newData or ${state.data} to int ($delta)");
+        print(e);
       }
 
-      if(period != null && tmp.difference(last_update).inSeconds >= period) {
-        periodUpdate = true;
+      try {
+        if(lastUpdate == null || (period != null && tmp.difference(lastUpdate).inSeconds >= period)) {
+          periodUpdate = true;
+        }
+      } catch(e) {
+        print("Failed to check $lastUpdate or $period");
+        print(e);
       }
 
       state.update(newData);
 
-      if(last_update == null || deltaUpdate || periodUpdate) {
-        print("Updating $name with $newData (${last_update == null} ${deltaUpdate} ${periodUpdate})");
+      if(deltaUpdate || periodUpdate) {
+        print("Updating $name with $newData (${lastUpdate == null} $deltaUpdate $periodUpdate)");
         wappsto.updateState(state);
-        last_update = tmp;
+        lastUpdate = tmp;
+        return true;
       }
-
     } else {
       print("Failed to find report state for $name");
     }
+
+    return false;
   }
 
   Wappsto get wappsto {
@@ -175,20 +209,28 @@ class Value {
   }
 
   String get url {
-    return "${parent.url}/value/${id}";
+    return "${parent.url}/value/$id";
   }
 
   void setType(String type) {
     this.type = type;
   }
 
+  void setDelta(double delta) {
+    this.delta = delta;
+  }
+
+  void setPeriod(int period) {
+    this.period = period;
+  }
+
   String toString() {
     if(number != null) {
-      return "Number Value '${name}' (${id})";
+      return "Number Value '$name' ($id)";
     } else if(string != null) {
-      return "String Value '${name}' (${id})";
+      return "String Value '$name' ($id)";
     }
 
-    return "Unknown Value  '${name}' (${id})";
+    return "Unknown Value  '$name' ($id)";
   }
 }

@@ -25,10 +25,10 @@ void main() async {
 
     print(c.ca);
     print(c.certificate);
-    print(c.private_key);
+    print(c.privateKey);
     File('ca.pem').writeAsStringSync(c.ca);
     File('cert.pem').writeAsStringSync(c.certificate);
-    File('key.pem').writeAsStringSync(c.private_key);
+    File('key.pem').writeAsStringSync(c.privateKey);
   }
 
   String ca = await File('ca.pem').readAsString();
@@ -117,8 +117,7 @@ void main() async {
   try {
     await w.connect();
 
-    var res = await w.postNetwork(network);
-    print(res);
+    await w.postNetwork(network);
 
   } catch(e) {
     print("ERR");

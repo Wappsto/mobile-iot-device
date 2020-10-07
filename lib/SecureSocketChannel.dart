@@ -71,7 +71,6 @@ class SecureSocketStream extends Stream {
 
 class SecureSocketSubscription extends StreamSubscription<String> {
   final _sub;
-  Function _cb;
 
   SecureSocketSubscription._(StreamSubscription sub)
   : _sub = sub,
@@ -107,11 +106,8 @@ class SecureSocketSubscription extends StreamSubscription<String> {
 }
 
 class SecureSocketSink extends DelegatingStreamSink {
-  final SecureSocket _socket;
-
   SecureSocketSink._(SecureSocket socket)
-  : _socket = socket,
-  super(socket);
+  : super(socket);
 
   @override
   void add(dynamic data) {

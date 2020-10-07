@@ -6,9 +6,9 @@ class Creator {
   final String name;
   final String ca;
   final String certificate;
-  final String private_key;
+  final String privateKey;
 
-  Creator({this.id, this.network, this.name, this.ca, this.certificate, this.private_key});
+  Creator({this.id, this.network, this.name, this.ca, this.certificate, this.privateKey});
 
   factory Creator.fromJson(Map<String, dynamic> jsonData) {
     String network;
@@ -26,7 +26,7 @@ class Creator {
     return Creator(
       ca: jsonData['ca'],
       certificate: jsonData['certificate'],
-      private_key: jsonData['private_key'],
+      privateKey: jsonData['private_key'],
       id: jsonData['meta']['id'],
       network: network,
       name: name,
@@ -34,6 +34,6 @@ class Creator {
   }
 
   String toString() {
-    return "Creator ${id} - Network ${network} ${name}";
+    return "Creator $id - Network $network $name";
   }
 }

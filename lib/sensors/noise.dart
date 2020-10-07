@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:noise_meter/noise_meter.dart';
-import 'dart:async';
 import 'package:mobile_iot_device/models/sensor.dart';
 import 'package:mobile_iot_device/models/device.dart';
 import 'package:mobile_iot_device/models/value.dart';
@@ -43,17 +42,16 @@ class NoiseSensor extends Sensor {
       _noiseMean = mean;
       _noiseMax = max;
 
-      if(_value != null) {
-        _value.update(mean);
-      }
-
-      print(noiseReading.meanDecibel);
       if(noiseReading.meanDecibel.isFinite) {
         if(_rawValue != null) {
-          _rawValue.update(noiseReading.meanDecibel.toInt().toString());
+          if(_rawValue.update(noiseReading.meanDecibel.toInt().toString())) {
+            if(_value != null) {
+              _value.update(mean);
+            }
+          }
         }
 
-        text = "${mean} (${noiseReading.meanDecibel.toInt().toString()} db)";
+        text = "$mean (${noiseReading.meanDecibel.toInt().toString()} db)";
         call();
       } else {
         print("Invalid value from MIC");
@@ -70,19 +68,17 @@ class NoiseSensor extends Sensor {
   }
 
   void linkValue(Device device) {
-    _value = device.findValue(name: 'Noise Meaning');
+    _value = device.findValue(name: 'Noise');
     if(_value == null) {
-      _value = device.createStringValue('Noise Meaning', 'Noise Meaning', 30);
+      _value = device.createStringValue('Noise', 'noise_meaning', 30);
       _value.createState(StateType.Report, data: "SOFT");
-    } else {
-      _value.setType('Noise Meaning');
     }
-    _rawValue = device.findValue(name: 'Noise');
+    _rawValue = device.findValue(name: 'Sound');
     if(_rawValue == null) {
-      _rawValue = device.createNumberValue('Noise', 'Noise', 0, 200, 1, 'db');
+      _rawValue = device.createNumberValue('Sound', 'sound_level', 0, 200, 1, 'db');
       _rawValue.createState(StateType.Report, data: "0");
-    } else {
-      _rawValue.setType('Noise');
     }
+
+    _rawValue.setDelta(20);
   }
 }

@@ -35,14 +35,20 @@ dependencies:
   noise_meter: ^1.2.0
   light: ^0.1.1
   device_info: ^0.4.2+4
-  geolocator: ^5.3.2+2
+  geolocator: ^6.0.0+4
   connectivity: ^0.4.9
   connectivity_macos: ^0.1.0+5
   flutter_login: ^1.0.14
   sensors: ^0.4.2+4
-  pedometer: ^2.0.2
-  flutter_signin_button: ^1.1.0
   flutter_compass: ^0.4.3
+  battery_info: ^1.0.3
+  flutter_signin_button: ^1.1.0
+  firebase_core: ^0.5.0
+  firebase_auth: ^0.18.0
+  google_sign_in: ^4.5.4
+  flutter_webview_plugin: ^0.3.11
+
+  #  flutter_magnetometer: ^0.1.1
 
 dev_dependencies:
   flutter_test:

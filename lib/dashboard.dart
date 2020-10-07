@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'dart:math';
-import 'dart:convert';
 
 import 'package:mobile_iot_device/manager.dart';
 import 'package:mobile_iot_device/login.dart';
@@ -45,13 +44,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Wappsto IoT Device',
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Wappsto IoT Device')
+          title: Text('Wappsto IoT Device'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.exit_to_app),
+              tooltip: 'Logout',
+              onPressed: () {
+                _logout(context);
+              },
+            ),
+          ],
         ),
         body: Center(
           child: _buildList()
         ),
       ),
     );
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+
+    _goToLogin(context);
   }
 
   Future<bool> _goToLogin(BuildContext context) {
@@ -93,7 +108,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     selected: sen.enabled,
 
     onTap: () {
-      print("tap");
       setState(() {
           sen.toggleEnabled();
       });
@@ -117,8 +131,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ),
     value: sen.enabled,
     onChanged: (bool value) {
+      print("changed to $value");
       setState(() {
-          sen.enabled = value;
+          sen.enable = value;
       });
     },
   );
