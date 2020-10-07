@@ -1,0 +1,211 @@
+{
+  "project_info": {
+    "project_number": "1062645914342",
+    "firebase_url": "https://wappsto-941e8.firebaseio.com",
+    "project_id": "wappsto-941e8",
+    "storage_bucket": "wappsto-941e8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062645914342:android:ad021c8fffa4958ca97927",
+        "android_client_info": {
+          "package_name": "com.heartbeatinstallationnative"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLsSLomKaf1USSfKbtpu2M6-v1TmhuaIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1062645914342-9uvivutgeqgnmodi0q5c20e33o7qgmsk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dk.pelletstove.aduro"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062645914342:android:7f1003b931d4e047a97927",
+        "android_client_info": {
+          "package_name": "com.wappsto.mobile_iot_device"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1062645914342-nnqh2sgc7nmm8elte14808rkcroks6jd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wappsto.mobile_iot_device",
+            "certificate_hash": "1ae659bae5ce8239f8d66d10ea2939bbf3845fde"
+          }
+        },
+        {
+          "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLsSLomKaf1USSfKbtpu2M6-v1TmhuaIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1062645914342-9uvivutgeqgnmodi0q5c20e33o7qgmsk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dk.pelletstove.aduro"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062645914342:android:84f3a7de15cafeb6a97927",
+        "android_client_info": {
+          "package_name": "com.wappsto_native"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1062645914342-kmk9pqksmubp9ar8scak055lar694b5b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wappsto_native",
+            "certificate_hash": "29a0c3fa174134ba4539bf97f40b100a572d69ce"
+          }
+        },
+        {
+          "client_id": "1062645914342-tv1oh01lked5d51nm4e9f6el24c77i9c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wappsto_native",
+            "certificate_hash": "64d166a62347a6f30e9411bde58f4b5f6e6f39f7"
+          }
+        },
+        {
+          "client_id": "1062645914342-mmnnf19ot9apnjiccnrc2acm1rahkgt6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wappsto_native",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLsSLomKaf1USSfKbtpu2M6-v1TmhuaIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1062645914342-9uvivutgeqgnmodi0q5c20e33o7qgmsk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dk.pelletstove.aduro"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062645914342:android:f2509ff026d0e3c5a97927",
+        "android_client_info": {
+          "package_name": "dk.pelletstove.aduro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1062645914342-171ctk2svk66mgcflqo9mcullhivict2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dk.pelletstove.aduro",
+            "certificate_hash": "5ebffcedf3f51b3ce683a6ef8a80c4149f35e7c7"
+          }
+        },
+        {
+          "client_id": "1062645914342-kpfc3fjgf982bctcv1lrq5bvp8vf3dm9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dk.pelletstove.aduro",
+            "certificate_hash": "e407063aad1732ce4ce2864a0a99c1eed6dbfdc5"
+          }
+        },
+        {
+          "client_id": "1062645914342-ib2aoh3umb8v8jl1jppg5rcs3q2qltan.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dk.pelletstove.aduro",
+            "certificate_hash": "33bad034ca857249eff6133dfd7dcc0b36bc91ec"
+          }
+        },
+        {
+          "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLsSLomKaf1USSfKbtpu2M6-v1TmhuaIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1062645914342-3qukbvirmd0qt9j6c9h5gsc7iij9ssfp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1062645914342-9uvivutgeqgnmodi0q5c20e33o7qgmsk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dk.pelletstove.aduro"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
