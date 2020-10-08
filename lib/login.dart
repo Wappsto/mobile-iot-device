@@ -45,47 +45,19 @@ class LoginScreen extends StatelessWidget {
     return 'Not Implement yet';
   }
 
-  Future<void> firebaseLogin() async {
-
-  }
-
   @override
   Widget build(BuildContext context) {
     List<Widget> loginButtons = [
       SignInButton(
         Buttons.Google,
         onPressed: () async {
-          signInWithGoogle().then((result) async {
-              if (result != null) {
-                var session = await firebaseSession(result);
-                if(session != null) {
-                  final SharedPreferences prefs = await _prefs;
-                  prefs.setString("session", session.id);
-
-                  Navigator.of(context).pushReplacement(FadePageRoute(
-                      builder: (context) => DashboardScreen(),
-                  ));
-                }
-              }
-          });
+          signInWithGoogle(context);
         },
       ),
       SignInButton(
         Buttons.Facebook,
         onPressed: () {
-          signInWithFacebook(context).then((result) async {
-              if (result != null) {
-                var session = await firebaseSession(result);
-                if(session != null) {
-                  final SharedPreferences prefs = await _prefs;
-                  prefs.setString("session", session.id);
-
-                  Navigator.of(context).pushReplacement(FadePageRoute(
-                      builder: (context) => DashboardScreen(),
-                  ));
-                }
-              }
-          });
+          signInWithFacebook(context);
         },
       ),
     ];
@@ -98,8 +70,7 @@ class LoginScreen extends StatelessWidget {
       );
     }
 
-    return SingleChildScrollView(
-      child: Stack(
+    return Stack(
         alignment: Alignment.center,
         children: <Widget>[
           FlutterLogin(
@@ -142,49 +113,67 @@ class LoginScreen extends StatelessWidget {
             )
           )
         ]
-      )
-    );
+      );
   }
 
-  Future<String> signInWithGoogle() async {
+  Future<void> firebaseLogin(AuthCredential creds, BuildContext context) async {
+    final authResult = await _auth.signInWithCredential(creds);
+    final User user = authResult.user;
+
+    if (user == null) {
+      return;
+    }
+
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
+
+    final User currentUser = _auth.currentUser;
+    assert(user.uid == currentUser.uid);
+
+    final String token = await user.getIdToken();
+
+    if (token == null) {
+        return;
+    }
+
+    var session = await firebaseSession(token);
+    if(session == null) {
+      return;
+    }
+
+    final SharedPreferences prefs = await _prefs;
+    prefs.setString("session", session.id);
+
+    Navigator.of(context).pushReplacement(FadePageRoute(
+        builder: (context) => DashboardScreen(),
+    ));
+  }
+
+  Future<void> signInWithGoogle(BuildContext context) async {
     await Firebase.initializeApp();
 
     final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
     final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
-
-    final AuthCredential credential = GoogleAuthProvider.credential(
+    final AuthCredential creds = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final UserCredential authResult = await _auth.signInWithCredential(credential);
-    final User user = authResult.user;
-
-    if (user != null) {
-      assert(!user.isAnonymous);
-      assert(await user.getIdToken() != null);
-
-      final User currentUser = _auth.currentUser;
-      assert(user.uid == currentUser.uid);
-
-      final String token = await user.getIdToken();
-
-      print('signInWithGoogle succeeded: $user');
-
-      return token;
-    }
-
-    return null;
+    firebaseLogin(creds, context);
   }
 
   Future<void> signOutGoogle() async {
-    await googleSignIn.signOut();
+    try {
+      await googleSignIn.signOut();
+    } catch(e) {
+      print(e);
+    }
 
     print("Google User Signed Out");
   }
 
-  Future<String> signInWithFacebook(context) async {
+  Future<void> signInWithFacebook(BuildContext context) async {
     print("Sign In With Facebook");
     String result = await Navigator.push(
       context,
@@ -195,36 +184,16 @@ class LoginScreen extends StatelessWidget {
         ),
         maintainState: true),
     );
-    print("Result:");
-    print(result);
+
     if (result != null) {
       try {
         await Firebase.initializeApp();
-
-        final facebookAuthCred = FacebookAuthProvider.credential(result);
-        final authResult = await _auth.signInWithCredential(facebookAuthCred);
-
-        final User user = authResult.user;
-
-        if (user != null) {
-          assert(!user.isAnonymous);
-          assert(await user.getIdToken() != null);
-
-          final User currentUser = _auth.currentUser;
-          assert(user.uid == currentUser.uid);
-
-          final String token = await user.getIdToken();
-
-          print('signInWithFacebook succeeded: $user');
-
-          return token;
-        }
+        final AuthCredential creds = FacebookAuthProvider.credential(result);
+        firebaseLogin(creds, context);
       } catch (e) {
         print(e);
       }
     }
-
-    return null;
   }
 }
 
