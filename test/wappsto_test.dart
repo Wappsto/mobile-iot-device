@@ -12,9 +12,6 @@ void main() async {
 
   if(loadFromServer) {
     final session = await fetchSession('', '');
-
-    print(session);
-
     final creators = await fetchCreator(session);
 
     creators.forEach(print);
@@ -34,8 +31,6 @@ void main() async {
   String key = await File('key.pem').readAsString();
   String host = "collector.wappsto.com";
   int port = 443;
-
-
 
   Wappsto w = new Wappsto(host: host, port: port, ca: ca, cert: cert, key: key);
 

@@ -66,6 +66,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.clear();
 
+    _manager.stop();
+
     _goToLogin(context);
   }
 
