@@ -9,10 +9,6 @@
       <key>NSAllowsArbitraryLoadsInWebContent</key>
       <true/>
     </dict>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>We need location to make Compass to work</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>We need location to make Compass to work</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -33,6 +29,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need location to make Compass to work</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need location to make Compass to work</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
