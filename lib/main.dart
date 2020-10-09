@@ -18,18 +18,18 @@ void main() {
 
 void runMainApp(SharedPreferences prefs) {
   runApp(
-    MyApp(prefs),
+    MobileIotDevice(prefs),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MobileIotDevice extends StatelessWidget {
   final SharedPreferences prefs;
-  MyApp(this.prefs);
+  MobileIotDevice(this.prefs);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Wappsto IoT Device',
+      title: 'SLX Mobile IoT Device',
       home: getStartScreen(),
       navigatorObservers: [TransitionRouteObserver()],
       routes: {
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
     var session = prefs.getString("session");
 
     if(session == null) {
-      return  LoginScreen();
+      return LoginScreen();
     } else {
       return DashboardScreen();
     }

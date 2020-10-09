@@ -72,12 +72,15 @@ class Manager {
   }
 
   void stop() async {
+    _connected = false;
     _sensors.forEach((s) => s.stop());
   }
 
   void update() {
-    state.setState(() {
-    });
+    if(_connected) {
+      state.setState(() {
+      });
+    }
   }
 
   Future<bool> connect() async {

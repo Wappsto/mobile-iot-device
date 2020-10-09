@@ -41,10 +41,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setup(context);
 
     return MaterialApp(
-      title: 'Wappsto IoT Device',
+      title: 'SLX Mobile IoT Device',
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Wappsto IoT Device'),
+          title: Text('SLX Mobile IoT Device'),
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.exit_to_app),
@@ -65,6 +65,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _logout(BuildContext context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.clear();
+
+    LoginScreen.logout();
 
     _manager.stop();
 

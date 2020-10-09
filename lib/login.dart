@@ -1,249 +1,558 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:flutter_login/flutter_login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mvc_pattern/mvc_pattern.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:mobile_iot_device/login_data.dart';
 
-import 'package:mobile_iot_device/utils/custom_route.dart';
-import 'package:mobile_iot_device/dashboard.dart';
-import 'package:mobile_iot_device/rest.dart';
-
-final String fbClientId = "2562179333883383";
-final String fbRedirectUrl = "https://wappsto-941e8.firebaseapp.com/__/auth/handler";
-
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn googleSignIn = GoogleSignIn();
-
-void printWrapped(String text) {
-  final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
-  pattern.allMatches(text).forEach((match) => print(match.group(0)));
-}
+TextEditingController _emailController = TextEditingController();
+TextEditingController _passwordController = TextEditingController();
+TextEditingController _newEmailController = TextEditingController();
+TextEditingController _newPasswordController = TextEditingController();
 
 class LoginScreen extends StatelessWidget {
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   static const routeName = '/auth';
-  Duration get loginTime => Duration(milliseconds: 2250);
 
-  Future<String> _loginUser(LoginData data) async {
-    try {
-      var session = await fetchSession(data.name, data.password);
-      final SharedPreferences prefs = await _prefs;
-      prefs.setString("session", session.id);
+  LoginScreen({Key key}) : super(key: key);
 
-      return null;
-    } catch (e) {
-      print(e);
-      return "Wrong username/Password";
-    }
-  }
-
-  Future<String> _recoverPassword(String name) async {
-    return 'Not Implement yet';
-  }
-
-  @override
   Widget build(BuildContext context) {
-    List<Widget> loginButtons = [
-      SignInButton(
-        Buttons.Google,
-        onPressed: () async {
-          signInWithGoogle(context);
-        },
-      ),
-      SignInButton(
-        Buttons.Facebook,
-        onPressed: () {
-          signInWithFacebook(context);
-        },
-      ),
-    ];
-
-    if (Platform.isIOS) {
-      loginButtons.add(SignInButton(
-          Buttons.Apple,
-          onPressed: () {},
-        )
-      );
-    }
-
-    return Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          FlutterLogin(
-            title: "IoT Device",
-            logo: 'assets/images/logo.png',
-            logoTag: "Seluxit Logo",
-            titleTag: "IoT Device Title",
-            emailValidator: (value) {
-              if (!value.contains('@') || !value.endsWith('.com')) {
-                return "Email must contain '@' and end with '.com'";
-              }
-              return null;
-            },
-            passwordValidator: (value) {
-              if (value.isEmpty) {
-                return 'Password is empty';
-              }
-              return null;
-            },
-            onLogin: (loginData) {
-              return _loginUser(loginData);
-            },
-            onSignup: (loginData) {
-              return _loginUser(loginData);
-            },
-            onSubmitAnimationCompleted: () {
-              Navigator.of(context).pushReplacement(FadePageRoute(
-                  builder: (context) => DashboardScreen(),
-              ));
-            },
-            onRecoverPassword: (name) {
-              return _recoverPassword(name);
-              // Show new password dialog
-            },
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: loginButtons,
-            )
+    return MaterialApp(
+      theme: _buildDarkTheme(),
+      home: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        body: Builder(
+          builder: (context) =>
+          SingleChildScrollView(
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColorLight
+                  ]
+                )
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(top: 40.0),
+                //Sets the main padding all widgets has to adhere to.
+                child: LogInPage(),
+              ),
+            ),
           )
-        ]
-      );
-  }
-
-  Future<void> firebaseLogin(AuthCredential creds, BuildContext context) async {
-    final authResult = await _auth.signInWithCredential(creds);
-    final User user = authResult.user;
-
-    if (user == null) {
-      return;
-    }
-
-    assert(!user.isAnonymous);
-    assert(await user.getIdToken() != null);
-
-    final User currentUser = _auth.currentUser;
-    assert(user.uid == currentUser.uid);
-
-    final String token = await user.getIdToken();
-
-    if (token == null) {
-        return;
-    }
-
-    var session = await firebaseSession(token);
-    if(session == null) {
-      return;
-    }
-
-    final SharedPreferences prefs = await _prefs;
-    prefs.setString("session", session.id);
-
-    Navigator.of(context).pushReplacement(FadePageRoute(
-        builder: (context) => DashboardScreen(),
-    ));
-  }
-
-  Future<void> signInWithGoogle(BuildContext context) async {
-    await Firebase.initializeApp();
-
-    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-
-    final AuthCredential creds = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
-
-    firebaseLogin(creds, context);
-  }
-
-  Future<void> signOutGoogle() async {
-    try {
-      await googleSignIn.signOut();
-    } catch(e) {
-      print(e);
-    }
-
-    print("Google User Signed Out");
-  }
-
-  Future<void> signInWithFacebook(BuildContext context) async {
-    print("Sign In With Facebook");
-    String result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CustomWebView(
-          selectedUrl:
-          'https://www.facebook.com/dialog/oauth?client_id=$fbClientId&redirect_uri=$fbRedirectUrl&response_type=token&scope=email,public_profile,',
         ),
-        maintainState: true),
+      )
     );
+  }
 
-    if (result != null) {
-      try {
-        await Firebase.initializeApp();
-        final AuthCredential creds = FacebookAuthProvider.credential(result);
-        firebaseLogin(creds, context);
-      } catch (e) {
-        print(e);
-      }
-    }
+  static Future logout() async {
+    await LoginData.logout();
   }
 }
 
-class CustomWebView extends StatefulWidget {
-  final String selectedUrl;
-
-  CustomWebView({this.selectedUrl});
-
-  @override
-  _CustomWebViewState createState() => _CustomWebViewState();
-}
-
-class _CustomWebViewState extends State<CustomWebView> {
-  final flutterWebviewPlugin = new FlutterWebviewPlugin();
-
-  @override
-  void initState() {
-    super.initState();
-
-    flutterWebviewPlugin.onUrlChanged.listen((String url) {
-        if (url.contains("#access_token")) {
-          succeed(url);
-        }
-
-        if (url.contains(
-            "https://www.facebook.com/connect/login_success.html?error=access_denied&error_code=200&error_description=Permissions+error&error_reason=user_denied")) {
-          denied();
-        }
-    });
-  }
-
-  denied() {
-    Navigator.pop(context);
-  }
-
-  succeed(String url) {
-    var params = url.split("access_token=");
-
-    var endparam = params[1].split("&");
-
-    Navigator.pop(context, endparam[0]);
-  }
+class _LogInPageState extends StateMVC<LogInPage> {
+  _LogInPageState() : super(LoginData());
 
   @override
   Widget build(BuildContext context) {
-    return WebviewScaffold(
-      url: widget.selectedUrl,
-      appBar: new AppBar(
-        backgroundColor: Color.fromRGBO(66, 103, 178, 1),
-        title: new Text("Facebook login"),
-    ));
+    SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+    ]);
+    ScreenUtil.init(context, designSize: Size(750, 1334), allowFontScaling: true);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  LoginData.displayLogoTitle,
+                  style: CustomTextStyle.title(context)
+                ),
+                Text(
+                  LoginData.displayLogoSubTitle,
+                  style: CustomTextStyle.subTitle(context),
+                ),
+              ],
+          )),
+          width: ScreenUtil().setWidth(750),
+          height: ScreenUtil().setHeight(190),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(60),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(left: 25.0, right: 25.0),
+            child: IntrinsicWidth(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  OutlineButton(
+                    onPressed: () =>
+                    setState(() => LoginData.changeToSignIn()),
+                    borderSide: new BorderSide(
+                      style: BorderStyle.none,
+                    ),
+                    child: new Text(LoginData.displaySignInMenuButton,
+                      style: LoginData.signInActive
+                      ? TextStyle(
+                        fontSize: 22,
+                        color: Theme
+                        .of(context)
+                        .accentColor,
+                        fontWeight: FontWeight.bold)
+                      : TextStyle(
+                        fontSize: 16,
+                        color: Theme
+                        .of(context)
+                        .accentColor,
+                        fontWeight: FontWeight.normal)),
+                  ),
+                  OutlineButton(
+                    onPressed: () =>
+                    setState(() => LoginData.changeToSignUp()),
+                    borderSide: BorderSide(
+                      style: BorderStyle.none,
+                    ),
+                    child: Text(LoginData.displaySignUpMenuButton,
+                      style: LoginData.signUpActive
+                      ? TextStyle(
+                        fontSize: 22,
+                        color: Theme
+                        .of(context)
+                        .accentColor,
+                        fontWeight: FontWeight.bold)
+                      : TextStyle(
+                        fontSize: 16,
+                        color: Theme
+                        .of(context)
+                        .accentColor,
+                        fontWeight: FontWeight.normal)),
+                  ),
+                  OutlineButton(
+                    onPressed: () =>
+                    setState(() => LoginData.changeToReset()),
+                    borderSide: BorderSide(
+                      style: BorderStyle.none,
+                    ),
+                    child: Text(LoginData.displayResetMenuButton,
+                      style: LoginData.resetActive
+                      ? TextStyle(
+                        fontSize: 22,
+                        color: Theme
+                        .of(context)
+                        .accentColor,
+                        fontWeight: FontWeight.bold)
+                      : TextStyle(
+                        fontSize: 16,
+                        color: Theme
+                        .of(context)
+                        .accentColor,
+                        fontWeight: FontWeight.normal)),
+                  )
+                ],
+              ),
+            ),
+          ),
+          width: ScreenUtil().setWidth(750),
+          height: ScreenUtil().setHeight(170),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(10),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(left: 30.0, right: 30.0),
+            child: LoginData.signInActive ? _showSignIn(context) : LoginData.signUpActive ? _showSignUp() : _showReset()),
+          width: ScreenUtil().setWidth(750),
+          height: ScreenUtil().setHeight(974),
+        ),
+      ],
+    );
+  }
+
+  Widget _showSignIn(context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: TextField(
+              style: TextStyle(color: Theme
+                .of(context)
+                .accentColor),
+              controller: _emailController,
+              decoration: InputDecoration(
+                hintText: LoginData.displayHintTextEmail,
+                hintStyle: CustomTextStyle.formField(context),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                prefixIcon: const Icon(
+                  Icons.email,
+                  color: Colors.white,
+                ),
+              ),
+              obscureText: false,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(30),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: TextField(
+              obscureText: true,
+              style: TextStyle(color: Theme
+                .of(context)
+                .accentColor),
+              controller: _passwordController,
+              decoration: InputDecoration(
+                hintText: LoginData.displayHintTextPassword,
+                hintStyle: CustomTextStyle.formField(context),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                prefixIcon: const Icon(
+                  Icons.lock,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(60),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: RaisedButton(
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.email,
+                    color: Colors.white,
+                  ),
+                  Expanded(
+                    child: Text(
+                      LoginData.displaySignInEmailButton,
+                      textAlign: TextAlign.center,
+                      style: CustomTextStyle.button(context),
+                    ),
+                  )
+                ],
+              ),
+              color: Colors.blueGrey,
+              onPressed: () =>
+              LoginData.tryToLogInUserViaEmail(
+                context, _emailController, _passwordController),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(30),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                horizontalLine(),
+                Text(LoginData.displaySeparatorText,
+                  style: CustomTextStyle.body(context)),
+                horizontalLine()
+              ],
+            ),
+          ),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(30),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Flexible(
+                  child: Text(LoginData.displayTermsText,
+                    style: CustomTextStyle.body(context),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SignInButton(
+          Buttons.Google,
+          onPressed: () async {
+            LoginData.signInWithGoogle(context);
+          },
+        ),
+        SignInButton(
+          Buttons.Facebook,
+          onPressed: () {
+            LoginData.signInWithFacebook(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _showSignUp() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SizedBox(
+          height: ScreenUtil().setHeight(30),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: TextField(
+              obscureText: false,
+              style: CustomTextStyle.formField(context),
+              controller: _newEmailController,
+              decoration: InputDecoration(
+                //Add th Hint text here.
+                hintText: LoginData.displayHintTextNewEmail,
+                hintStyle: CustomTextStyle.formField(context),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                prefixIcon: const Icon(
+                  Icons.email,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(50),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: TextField(
+              obscureText: true,
+              style: CustomTextStyle.formField(context),
+              controller: _newPasswordController,
+              decoration: InputDecoration(
+                //Add the Hint text here.
+                hintText: LoginData.displayHintTextNewPassword,
+                hintStyle: CustomTextStyle.formField(context),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                prefixIcon: const Icon(
+                  Icons.lock,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(80),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: RaisedButton(
+              child: Text(
+                LoginData.displaySignUpMenuButton,
+                style: CustomTextStyle.button(context),
+              ),
+              color: Colors.blueGrey,
+              onPressed: () =>
+              LoginData.signUpWithEmailAndPassword(
+                _newEmailController, _newPasswordController),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _showReset() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SizedBox(
+          height: ScreenUtil().setHeight(30),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: TextField(
+              obscureText: false,
+              style: CustomTextStyle.formField(context),
+              controller: _newEmailController,
+              decoration: InputDecoration(
+                //Add th Hint text here.
+                hintText: LoginData.displayHintTextNewEmail,
+                hintStyle: CustomTextStyle.formField(context),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme
+                    .of(context)
+                    .accentColor, width: 1.0)),
+                prefixIcon: const Icon(
+                  Icons.email,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: ScreenUtil().setHeight(80),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(),
+            child: RaisedButton(
+              child: Text(
+                LoginData.displayResetMenuFullButton,
+                style: CustomTextStyle.button(context),
+              ),
+              color: Colors.blueGrey,
+              onPressed: () =>
+              LoginData.resetWithEmail(_newEmailController),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget horizontalLine() =>
+  Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16.0),
+    child: Container(
+      width: ScreenUtil().setWidth(120),
+      height: 1.0,
+      color: Colors.white.withOpacity(0.6),
+    ),
+  );
+
+  Widget emailErrorText() => Text(LoginData.displayErrorEmailLogIn);
+}
+
+class LogInPage extends StatefulWidget {
+  LogInPage({Key key}) : super(key: key);
+
+  @protected
+  @override
+  State<StatefulWidget> createState() => _LogInPageState();
+}
+
+ThemeData _buildDarkTheme() {
+  final baseTheme = ThemeData(
+    fontFamily: "Open Sans",
+  );
+  return baseTheme.copyWith(
+    brightness: Brightness.dark,
+    primaryColor: Color(0xFF143642),
+    primaryColorLight: Color(0xFF26667d),
+    primaryColorDark: Color(0xFF08161b),
+    primaryColorBrightness: Brightness.dark,
+    accentColor: Colors.white,
+  );
+}
+
+class CustomTextStyle {
+  static TextStyle formField(BuildContext context) {
+    return Theme
+    .of(context)
+    .textTheme
+    .title
+    .copyWith(
+      fontSize: 18.0, fontWeight: FontWeight.normal, color: Colors.white);
+  }
+
+  static TextStyle title(BuildContext context) {
+    return Theme
+    .of(context)
+    .textTheme
+    .title
+    .copyWith(
+      fontSize: 29, fontWeight: FontWeight.bold, color: Colors.white);
+  }
+
+  static TextStyle subTitle(BuildContext context) {
+    return Theme
+    .of(context)
+    .textTheme
+    .title
+    .copyWith(
+      fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white);
+  }
+
+  static TextStyle button(BuildContext context) {
+    return Theme
+    .of(context)
+    .textTheme
+    .title
+    .copyWith(
+      fontSize: 20, fontWeight: FontWeight.normal, color: Colors.white);
+  }
+
+  static TextStyle body(BuildContext context) {
+    return Theme
+    .of(context)
+    .textTheme
+    .title
+    .copyWith(
+      fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white);
   }
 }
