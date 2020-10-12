@@ -20,7 +20,7 @@ class LoginScreen extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: _buildDarkTheme(),
+      theme: Theme.of(context),
       home: Scaffold(
         resizeToAvoidBottomPadding: false,
         body: Builder(
@@ -29,14 +29,7 @@ class LoginScreen extends StatelessWidget {
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColorLight
-                  ]
-                )
+                color: Theme.of(context).primaryColor,
               ),
               child: Padding(
                 padding: EdgeInsets.only(top: 40.0),
@@ -71,7 +64,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
       children: <Widget>[
         Container(
           child: Padding(
-            padding: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+            padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -105,16 +98,12 @@ class _LogInPageState extends StateMVC<LogInPage> {
                     child: new Text(LoginData.displaySignInMenuButton,
                       style: LoginData.signInActive
                       ? TextStyle(
-                        fontSize: 22,
-                        color: Theme
-                        .of(context)
-                        .accentColor,
+                        fontSize: 18,
+                        color: Theme.of(context).accentColor,
                         fontWeight: FontWeight.bold)
                       : TextStyle(
-                        fontSize: 16,
-                        color: Theme
-                        .of(context)
-                        .accentColor,
+                        fontSize: 14,
+                        color: Colors.white,
                         fontWeight: FontWeight.normal)),
                   ),
                   OutlineButton(
@@ -126,16 +115,12 @@ class _LogInPageState extends StateMVC<LogInPage> {
                     child: Text(LoginData.displaySignUpMenuButton,
                       style: LoginData.signUpActive
                       ? TextStyle(
-                        fontSize: 22,
-                        color: Theme
-                        .of(context)
-                        .accentColor,
+                        fontSize: 18,
+                        color: Theme.of(context).accentColor,
                         fontWeight: FontWeight.bold)
                       : TextStyle(
-                        fontSize: 16,
-                        color: Theme
-                        .of(context)
-                        .accentColor,
+                        fontSize: 14,
+                        color: Colors.white,
                         fontWeight: FontWeight.normal)),
                   ),
                   OutlineButton(
@@ -147,16 +132,12 @@ class _LogInPageState extends StateMVC<LogInPage> {
                     child: Text(LoginData.displayResetMenuButton,
                       style: LoginData.resetActive
                       ? TextStyle(
-                        fontSize: 22,
-                        color: Theme
-                        .of(context)
-                        .accentColor,
+                        fontSize: 18,
+                        color: Theme.of(context).accentColor,
                         fontWeight: FontWeight.bold)
                       : TextStyle(
-                        fontSize: 16,
-                        color: Theme
-                        .of(context)
-                        .accentColor,
+                        fontSize: 14,
+                        color: Colors.white,
                         fontWeight: FontWeight.normal)),
                   )
                 ],
@@ -205,9 +186,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 errorText: validateEmail(_emailController.text),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: Theme
-                    .of(context)
-                    .accentColor, width: 1.0)),
+                    color: Colors.white, width: 1.0)),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme
@@ -239,9 +218,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 hintStyle: CustomTextStyle.formField(context),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: Theme
-                    .of(context)
-                    .accentColor, width: 1.0)),
+                    color: Colors.white, width: 1.0)),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme
@@ -277,7 +254,8 @@ class _LogInPageState extends StateMVC<LogInPage> {
                   )
                 ],
               ),
-              color: Colors.blueGrey,
+              color: Theme.of(context).accentColor,
+              padding: EdgeInsets.all(12),
               onPressed: () {
                 print(_emailKey.currentWidget);
                 print(_emailKey.currentContext);
@@ -310,7 +288,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
         ),
         Container(
           child: Padding(
-            padding: EdgeInsets.only(),
+            padding: EdgeInsets.only(bottom: 20),
             child: Wrap(
               alignment: WrapAlignment.center,
               children: <Widget>[
@@ -381,9 +359,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 errorText: validateEmail(_newEmailController.text),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: Theme
-                    .of(context)
-                    .accentColor, width: 1.0)),
+                    color: Colors.white, width: 1.0)),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme
@@ -413,9 +389,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 hintStyle: CustomTextStyle.formField(context),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: Theme
-                    .of(context)
-                    .accentColor, width: 1.0)),
+                    color: Colors.white, width: 1.0)),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme
@@ -440,7 +414,8 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 LoginData.displaySignUpMenuButton,
                 style: CustomTextStyle.button(context),
               ),
-              color: Colors.blueGrey,
+              color: Theme.of(context).accentColor,
+              padding: EdgeInsets.all(12),
               onPressed: () =>
               LoginData.signUpWithEmailAndPassword(
                 _newEmailController, _newPasswordController),
@@ -468,9 +443,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 hintStyle: CustomTextStyle.formField(context),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: Theme
-                    .of(context)
-                    .accentColor, width: 1.0)),
+                    color: Colors.white, width: 1.0)),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme
@@ -495,7 +468,8 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 LoginData.displayResetMenuFullButton,
                 style: CustomTextStyle.button(context),
               ),
-              color: Colors.blueGrey,
+              color: Theme.of(context).accentColor,
+              padding: EdgeInsets.all(12),
               onPressed: () async {
                 _showLoading(context);
                 _showMessage(
@@ -572,7 +546,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
 
   Widget horizontalLine() =>
   Padding(
-    padding: EdgeInsets.symmetric(horizontal: 16.0),
+    padding: EdgeInsets.all(16.0),
     child: Container(
       width: ScreenUtil().setWidth(120),
       height: 1.0,
@@ -597,20 +571,6 @@ class LogInPage extends StatefulWidget {
   State<StatefulWidget> createState() => _LogInPageState();
 }
 
-ThemeData _buildDarkTheme() {
-  final baseTheme = ThemeData(
-    fontFamily: "Open Sans",
-  );
-  return baseTheme.copyWith(
-    brightness: Brightness.dark,
-    primaryColor: Color(0xFF143642),
-    primaryColorLight: Color(0xFF26667d),
-    primaryColorDark: Color(0xFF08161b),
-    primaryColorBrightness: Brightness.dark,
-    accentColor: Colors.white,
-  );
-}
-
 class CustomTextStyle {
   static TextStyle formField(BuildContext context) {
     return Theme
@@ -627,7 +587,7 @@ class CustomTextStyle {
     .textTheme
     .title
     .copyWith(
-      fontSize: 29, fontWeight: FontWeight.bold, color: Colors.white);
+      fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white);
   }
 
   static TextStyle subTitle(BuildContext context) {

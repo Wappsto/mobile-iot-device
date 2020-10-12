@@ -37,7 +37,7 @@ class LoginData extends ControllerMVC {
   static bool get resetActive => _this._resetActive;
 
   static String get displayLogoTitle => "SLX Mobile IoT Device";
-  static String get displayLogoSubTitle => "Powered by Wappsto";
+  static String get displayLogoSubTitle => "Turn your mobile device into an IoT device";
   static String get displaySignInMenuButton => "SIGN IN";
   static String get displaySignUpMenuButton => "SIGN UP";
   static String get displayResetMenuButton => "FORGOT";

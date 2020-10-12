@@ -53,7 +53,7 @@ class _SplashAppState extends State<SplashApp> {
     return Center(
       child: CircularProgressIndicator(
         strokeWidth: 10,
-        backgroundColor: Colors.blue
+        backgroundColor: Theme.of(context).primaryColor
       ),
     );
   }
