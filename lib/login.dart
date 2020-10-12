@@ -4,6 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:mobile_iot_device/login_data.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final _emailKey = GlobalKey<FormState>();
 
 TextEditingController _emailController = TextEditingController();
 TextEditingController _passwordController = TextEditingController();
@@ -83,10 +86,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
               ],
           )),
           width: ScreenUtil().setWidth(750),
-          height: ScreenUtil().setHeight(190),
-        ),
-        SizedBox(
-          height: ScreenUtil().setHeight(60),
+          height: ScreenUtil().setHeight(160),
         ),
         Container(
           child: Padding(
@@ -187,14 +187,22 @@ class _LogInPageState extends StateMVC<LogInPage> {
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
-            child: TextField(
+            child: TextFormField(
+              key: _emailKey,
               style: TextStyle(color: Theme
                 .of(context)
                 .accentColor),
               controller: _emailController,
+              validator: (text) {
+                if (text == null || text.isEmpty) {
+                  return 'Text is empty';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                 hintText: LoginData.displayHintTextEmail,
                 hintStyle: CustomTextStyle.formField(context),
+                errorText: validateEmail(_emailController.text),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme
@@ -270,10 +278,14 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 ],
               ),
               color: Colors.blueGrey,
-              onPressed: () =>
-              LoginData.tryToLogInUserViaEmail(
-                context, _emailController, _passwordController),
-            ),
+              onPressed: () {
+                print(_emailKey.currentWidget);
+                print(_emailKey.currentContext);
+                //if (_emailKey.currentWidget.validate()) {
+                LoginData.tryToLogInUserViaEmail(context, _emailController, _passwordController);
+                //}
+              },
+            )
           ),
         ),
         SizedBox(
@@ -299,14 +311,38 @@ class _LogInPageState extends StateMVC<LogInPage> {
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Wrap(
+              alignment: WrapAlignment.center,
               children: <Widget>[
-                Flexible(
-                  child: Text(LoginData.displayTermsText,
-                    style: CustomTextStyle.body(context),
-                    textAlign: TextAlign.center,
+                Text(LoginData.displayTermsText,
+                  style: CustomTextStyle.body(context),
+                  textAlign: TextAlign.center,
+                ),
+                InkWell(
+                  child: Text(
+                    "Terms",
+                    style: CustomTextStyle.link(context),
                   ),
+                  onTap: () async {
+                    if (await canLaunch(LoginData.termsLink)) {
+                      await launch(LoginData.termsLink);
+                    }
+                  }
+                ),
+                Text(LoginData.displayPrivacyText,
+                  style: CustomTextStyle.body(context),
+                  textAlign: TextAlign.center,
+                ),
+                InkWell(
+                  child: Text(
+                    "Privacy Notice.",
+                    style: CustomTextStyle.link(context),
+                  ),
+                  onTap: () async {
+                    if (await canLaunch(LoginData.privacyLink)) {
+                      await launch(LoginData.privacyLink);
+                    }
+                  }
                 ),
               ],
             ),
@@ -332,9 +368,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        SizedBox(
-          height: ScreenUtil().setHeight(30),
-        ),
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
@@ -343,9 +376,9 @@ class _LogInPageState extends StateMVC<LogInPage> {
               style: CustomTextStyle.formField(context),
               controller: _newEmailController,
               decoration: InputDecoration(
-                //Add th Hint text here.
                 hintText: LoginData.displayHintTextNewEmail,
                 hintStyle: CustomTextStyle.formField(context),
+                errorText: validateEmail(_newEmailController.text),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme
@@ -422,9 +455,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        SizedBox(
-          height: ScreenUtil().setHeight(30),
-        ),
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
@@ -466,12 +496,77 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 style: CustomTextStyle.button(context),
               ),
               color: Colors.blueGrey,
-              onPressed: () =>
-              LoginData.resetWithEmail(_newEmailController),
+              onPressed: () async {
+                _showLoading(context);
+                _showMessage(
+                  context,
+                  'Reset password',
+                  await LoginData.resetWithEmail(_newEmailController)
+                );
+              },
             ),
           ),
         ),
       ],
+    );
+  }
+
+  final GlobalKey<State> _keyLoader = GlobalKey<State>();
+
+  void _showLoading(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context){
+        return SimpleDialog(
+          key: _keyLoader,
+          children: <Widget>[
+            Center(
+              child: Container(
+                child: Row(
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    SizedBox(
+                      height:10,
+                      width:10,
+                    ),
+                    Text("Please Wait!"),
+                  ]
+                ),
+              ),
+            ),
+          ]
+        );
+      }
+    );
+  }
+
+  Future<void> _showMessage(BuildContext context, String title, String message) async {
+    Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();//close the dialoge
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(message),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -485,7 +580,13 @@ class _LogInPageState extends StateMVC<LogInPage> {
     ),
   );
 
-  Widget emailErrorText() => Text(LoginData.displayErrorEmailLogIn);
+  String validateEmail(String value) {
+    print("validate");
+    if (RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$").hasMatch(value)) {
+      return null;
+    }
+    return "Invalid Email";
+  }
 }
 
 class LogInPage extends StatefulWidget {
@@ -554,5 +655,14 @@ class CustomTextStyle {
     .title
     .copyWith(
       fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white);
+  }
+
+  static TextStyle link(BuildContext context) {
+    return Theme
+    .of(context)
+    .textTheme
+    .title
+    .copyWith(
+      fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white);
   }
 }

@@ -38,7 +38,6 @@ dependencies:
   geolocator: ^6.0.0+4
   connectivity: ^0.4.9
   connectivity_macos: ^0.1.0+5
-  flutter_login: ^1.0.14
   sensors: ^0.4.2+4
   flutter_compass: ^0.4.3
   battery_info: ^1.0.3
@@ -54,7 +53,7 @@ dependencies:
   intl: ^0.16.1
   mvc_pattern: ^3.4.3
   splashscreen: ^1.2.0
-
+  url_launcher: ^5.7.2
 
 dev_dependencies:
   flutter_test:

@@ -49,7 +49,11 @@ class LoginData extends ControllerMVC {
   static String get displaySignInEmailButton => "Sign in with Wappsto";
   static String get displaySeparatorText => "or";
   static String get displayErrorEmailLogIn => "Email or Password was incorrect. Please try again";
-  static String get displayTermsText => "By signing in, you agree to our Terms and that you have read our Privacy Notice.";
+  static String get displayTermsText => "By signing in, you agree to our ";
+  static String get displayPrivacyText => "and that you have read our ";
+
+  static String get privacyLink => "https://www.seluxit.com/privacy";
+  static String get termsLink => "https://www.seluxit.com/wp-content/uploads/2020/06/Cloud-Solutions-Terms-and-Conditions-Business.pdf";
 
   static void changeToSignUp() {
     _this._signUpActive = true;
@@ -147,9 +151,9 @@ class LoginData extends ControllerMVC {
     }
   }
 
-  static Future<String> signInWithEmail(context, email, password) async {
+  static Future<String> signInWithEmail(BuildContext context, String email, String password) async {
     try {
-      var session = await fetchSession(email, password);
+      var session = await fetchSession(email.trim(), password);
       final SharedPreferences prefs = await _this._prefs;
       prefs.setString("session", session.id);
 
@@ -164,17 +168,24 @@ class LoginData extends ControllerMVC {
 
   }
 
-  static void resetWithEmail(email) async {
-
+  static Future<String> resetWithEmail(email) async {
+    String msg = await resetPassword(email.text.trim());
+    if(msg == null) {
+      return "Failed to reset password";
+    } else {
+      return msg;
+    }
   }
 
-  static Future _navigateToDashboard(context) async {
+  static Future _navigateToDashboard(BuildContext context) async {
     await Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardScreen()));
   }
 
-  static Future tryToLogInUserViaEmail(context, email, password) async {
-    String res = await signInWithEmail(context, email, password);
+  static Future tryToLogInUserViaEmail(BuildContext context, TextEditingController email, TextEditingController password) async {
+    String res = await signInWithEmail(context, email.text, password.text);
     if(res == null) {
+      email.clear();
+      password.clear();
       _navigateToDashboard(context);
     } else {
       print(res);
