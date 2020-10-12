@@ -19,27 +19,31 @@ class LoginScreen extends StatelessWidget {
   LoginScreen({Key key}) : super(key: key);
 
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: Theme.of(context),
-      home: Scaffold(
-        resizeToAvoidBottomPadding: false,
-        body: Builder(
-          builder: (context) =>
-          SingleChildScrollView(
-            child: Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(top: 40.0),
-                //Sets the main padding all widgets has to adhere to.
-                child: LogInPage(),
-              ),
+    return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      body: Builder(
+        builder: (context) =>
+        SingleChildScrollView(
+          child: Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Theme.of(context).primaryColor,
+                  Theme.of(context).primaryColorLight
+                ]
+              )
             ),
-          )
-        ),
-      )
+            child: Padding(
+              padding: EdgeInsets.only(top: 40.0),
+              //Sets the main padding all widgets has to adhere to.
+              child: LogInPage(),
+            ),
+          ),
+        )
+      ),
     );
   }
 
@@ -180,7 +184,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
               decoration: InputDecoration(
                 hintText: LoginData.displayHintTextEmail,
                 hintStyle: CustomTextStyle.formField(context),
-                errorText: validateEmail(_emailController.text),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Colors.white, width: 1.0)),
@@ -350,7 +353,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
               decoration: InputDecoration(
                 hintText: LoginData.displayHintTextNewEmail,
                 hintStyle: CustomTextStyle.formField(context),
-                errorText: validateEmail(_newEmailController.text),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Colors.white, width: 1.0)),
@@ -410,9 +412,15 @@ class _LogInPageState extends StateMVC<LogInPage> {
               ),
               color: Theme.of(context).accentColor,
               padding: EdgeInsets.all(12),
-              onPressed: () =>
-              LoginData.signUpWithEmailAndPassword(
-                _newEmailController, _newPasswordController),
+              onPressed: () async {
+                _showLoading(context);
+                _showMessage(
+                  context,
+                  'Signup',
+                  await LoginData.signUpWithEmailAndPassword(
+                    _newEmailController, _newPasswordController),
+                );
+              },
             ),
           ),
         ),

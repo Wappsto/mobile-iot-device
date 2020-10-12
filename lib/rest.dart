@@ -6,6 +6,16 @@ import 'package:mobile_iot_device/models/creator.dart';
 
 final String host = 'https://wappsto.com/services';
 
+class RestException implements Exception {
+  String message;
+  String result;
+  RestException(this.message, this.result);
+
+  String toString() {
+    return "$message ($result)";
+  }
+}
+
 Future<String> fetchFromWappsto(String url, {Map jsonData, String session, bool patch}) async {
   final client = new HttpClient();
   HttpClientRequest request;
@@ -22,12 +32,12 @@ Future<String> fetchFromWappsto(String url, {Map jsonData, String session, bool 
     }
   } else {
     if(jsonData != null) {
-      if(patch) {
-        request = await client.patchUrl(Uri.parse(url))
+      if(patch == null) {
+        request = await client.postUrl(Uri.parse(url))
         ..headers.contentType = ContentType.json
         ..write(jsonEncode(jsonData));
       } else {
-        request = await client.postUrl(Uri.parse(url))
+        request = await client.patchUrl(Uri.parse(url))
         ..headers.contentType = ContentType.json
         ..write(jsonEncode(jsonData));
       }
@@ -46,7 +56,7 @@ Future<String> fetchFromWappsto(String url, {Map jsonData, String session, bool 
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
-    throw Exception("Failed to load data from Wappsto ${response.statusCode}: $url");
+    throw RestException("Failed to load data from Wappsto ${response.statusCode}: $url", json.decode(body)['message']);
   }
 }
 
@@ -99,6 +109,26 @@ Future<Session> validateSession(String id) async {
     return Session.fromJson(json.decode(data));
   } catch(e) {
     print("Session is not valid");
+  }
+
+  return null;
+}
+
+Future<String> signup(String email, String password) async {
+  String url = "$host/2.1/register";
+
+  Map jsonData = {
+    'username': email,
+    'password': password
+  };
+
+  try {
+    final data = await fetchFromWappsto(url, jsonData: jsonData);
+    print(data);
+    return "ok";
+  } catch(e) {
+    print("Failed to signup to wappsto");
+    print(e);
   }
 
   return null;

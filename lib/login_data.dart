@@ -13,8 +13,6 @@ class LoginData extends ControllerMVC {
   final String fbClientId = "2562179333883383";
   final String fbRedirectUrl = "https://wappsto-941e8.firebaseapp.com/__/auth/handler";
 
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-
   bool _signUpActive = false;
   bool _signInActive = true;
   bool _resetActive = false;
@@ -107,7 +105,7 @@ class LoginData extends ControllerMVC {
   static Future<void> signInWithGoogle(BuildContext context) async {
     await Firebase.initializeApp();
 
-    final GoogleSignInAccount googleSignInAccount = await _this.googleSignIn.signIn();
+    final GoogleSignInAccount googleSignInAccount = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
     final AuthCredential creds = GoogleAuthProvider.credential(
@@ -120,7 +118,7 @@ class LoginData extends ControllerMVC {
 
   static Future<void> signOutGoogle() async {
     try {
-      await _this.googleSignIn.signOut();
+      await GoogleSignIn().signOut();
     } catch(e) {
       print(e);
     }
@@ -164,10 +162,6 @@ class LoginData extends ControllerMVC {
     }
   }
 
-  static void signUpWithEmailAndPassword(email, password) async {
-
-  }
-
   static Future<String> resetWithEmail(email) async {
     String msg = await resetPassword(email.text.trim());
     if(msg == null) {
@@ -178,7 +172,7 @@ class LoginData extends ControllerMVC {
   }
 
   static Future _navigateToDashboard(BuildContext context) async {
-    await Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardScreen()));
+    await Navigator.pushNamedAndRemoveUntil(context, DashboardScreen.routeName, (_) => false);
   }
 
   static Future tryToLogInUserViaEmail(BuildContext context, TextEditingController email, TextEditingController password) async {
@@ -192,11 +186,12 @@ class LoginData extends ControllerMVC {
     }
   }
 
-  static Future tryToSignUpWithEmail(email, password) async {
-    if (await tryToSignUpWithEmail(email, password) == true) {
-      //TODO Display success message or go to Login screen
+  static Future<String> signUpWithEmailAndPassword(email, password) async {
+    String msg = await signup(email.text.trim(), password.text);
+    if(msg == null) {
+      return "Failed to signup to Wappsto";
     } else {
-      //TODO Display error message and stay put.
+      return msg;
     }
   }
 

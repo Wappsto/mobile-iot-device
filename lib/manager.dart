@@ -30,7 +30,10 @@ class Manager {
   Map<String, dynamic> deviceData;
   bool _connected = false;
 
-  Manager({this.state});
+  Manager({this.state}) {
+    print("new state");
+    print(state);
+  }
 
   Future<bool> setup() async {
     _connected = false;

@@ -30,7 +30,7 @@ class MobileIotDevice extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SLX Mobile IoT Device',
-      home: getStartScreen(),
+      home: DashboardScreen(),//getStartScreen(),
       navigatorObservers: [TransitionRouteObserver()],
       routes: {
         LoginScreen.routeName: (context) => LoginScreen(),

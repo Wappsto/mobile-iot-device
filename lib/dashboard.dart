@@ -21,7 +21,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
 
-    _manager = new Manager(state: this);
+    _manager = Manager(state: this);
+  }
+
+  @override
+  void dispose() {
+    _manager.stop();
+    super.dispose();
   }
 
   Future<void> setup(BuildContext context) async {
@@ -40,24 +46,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     setup(context);
 
-    return MaterialApp(
-      title: 'SLX Mobile IoT Device',
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('SLX Mobile IoT Device'),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.exit_to_app),
-              tooltip: 'Logout',
-              onPressed: () {
-                _logout(context);
-              },
-            ),
-          ],
-        ),
-        body: Center(
-          child: _buildList()
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('SLX Mobile IoT Device'),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            tooltip: 'Logout',
+            onPressed: () {
+              _logout(context);
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: _buildList()
       ),
     );
   }
@@ -66,9 +70,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.clear();
 
-    LoginScreen.logout();
-
     _manager.stop();
+
+    LoginScreen.logout();
 
     _goToLogin(context);
   }
