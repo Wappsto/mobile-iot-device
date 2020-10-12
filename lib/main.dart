@@ -36,6 +36,11 @@ class MobileIotDevice extends StatelessWidget {
         LoginScreen.routeName: (context) => LoginScreen(),
         DashboardScreen.routeName: (context) => DashboardScreen(),
       },
+      theme: ThemeData(
+        primaryColor: Color(0xFF1F324D),
+        accentColor: Colors.blue[400],
+        errorColor: Colors.red[400],
+      )
     );
   }
 
