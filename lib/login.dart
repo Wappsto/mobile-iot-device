@@ -83,7 +83,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
         ),
         Container(
           child: Padding(
-            padding: EdgeInsets.only(left: 25.0, right: 25.0),
+            padding: EdgeInsets.only(top:30, left: 25.0, right: 25.0),
             child: IntrinsicWidth(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -147,9 +147,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
           width: ScreenUtil().setWidth(750),
           height: ScreenUtil().setHeight(170),
         ),
-        SizedBox(
-          height: ScreenUtil().setHeight(10),
-        ),
         Container(
           child: Padding(
             padding: EdgeInsets.only(left: 30.0, right: 30.0),
@@ -202,7 +199,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil().setHeight(30),
+          height: ScreenUtil().setHeight(10),
         ),
         Container(
           child: Padding(
@@ -233,7 +230,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil().setHeight(60),
+          height: ScreenUtil().setHeight(80),
         ),
         Container(
           child: Padding(
@@ -275,9 +272,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                horizontalLine(),
-                Text(LoginData.displaySeparatorText,
-                  style: CustomTextStyle.body(context)),
                 horizontalLine()
               ],
             ),
@@ -374,7 +368,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil().setHeight(50),
+          height: ScreenUtil().setHeight(10),
         ),
         Container(
           child: Padding(
@@ -623,6 +617,6 @@ class CustomTextStyle {
     .textTheme
     .title
     .copyWith(
-      fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white);
+      fontSize: 14, color: Theme.of(context).accentColor);
   }
 }
