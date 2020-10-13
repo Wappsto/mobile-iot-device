@@ -99,7 +99,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ListTile _tile(Sensor sen) => ListTile(
     leading: Icon(
       sen.icon,
-      color: Colors.blue[500],
     ),
     title: Text(
       sen.toString(),
@@ -114,7 +113,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     trailing: Icon(Icons.keyboard_arrow_right),
 
     selected: sen.enabled,
-
+    selectedTileColor: Colors.blue[100],
     onTap: () {
       setState(() {
           sen.toggleEnabled();

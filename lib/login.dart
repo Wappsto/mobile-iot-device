@@ -61,7 +61,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
       children: <Widget>[
         Container(
           child: Padding(
-            padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
+            padding: EdgeInsets.only(top: 10.0, bottom: 30.0, left: 20.0, right: 20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -76,11 +76,11 @@ class _LogInPageState extends StateMVC<LogInPage> {
               ],
           )),
           width: ScreenUtil().setWidth(750),
-          height: ScreenUtil().setHeight(160),
+          height: ScreenUtil().setHeight(220),
         ),
         Container(
           child: Padding(
-            padding: EdgeInsets.only(top:30, left: 25.0, right: 25.0),
+            padding: EdgeInsets.only(top:10, left: 25.0, right: 25.0),
             child: IntrinsicWidth(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -149,7 +149,32 @@ class _LogInPageState extends StateMVC<LogInPage> {
             padding: EdgeInsets.only(left: 30.0, right: 30.0),
             child: LoginData.signInActive ? _showSignIn(context) : LoginData.signUpActive ? _showSignUp() : _showReset()),
           width: ScreenUtil().setWidth(750),
-          height: ScreenUtil().setHeight(974),
+          height: ScreenUtil().setHeight(932),
+        ),
+        Container(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              children: <Widget>[
+                Text(
+                  LoginData.displayPoweredByText,
+                  style: CustomTextStyle.body(context),
+                  textAlign: TextAlign.center,
+                ),
+                InkWell(
+                  child: Text(
+                    "Seluxit A/S",
+                    style: CustomTextStyle.link(context),
+                  ),
+                  onTap: () async {
+                    if (await canLaunch(LoginData.seluxitLink)) {
+                      await launch(LoginData.seluxitLink);
+                    }
+                  }
+                ),
+              ],
+          )),
         ),
       ],
     );
@@ -234,10 +259,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: RaisedButton(
               child: Row(
                 children: <Widget>[
-                  Icon(
-                    Icons.email,
-                    color: Colors.white,
-                  ),
                   Expanded(
                     child: Text(
                       LoginData.displaySignInEmailButton,
@@ -318,12 +339,17 @@ class _LogInPageState extends StateMVC<LogInPage> {
         ),
         SignInButton(
           Buttons.Google,
+          padding: EdgeInsets.all(4),
           onPressed: () async {
             LoginData.signInWithGoogle(context);
           },
         ),
+        SizedBox(
+          height: ScreenUtil().setHeight(20),
+        ),
         SignInButton(
           Buttons.Facebook,
+          padding: EdgeInsets.all(12),
           onPressed: () {
             LoginData.signInWithFacebook(context);
           },
@@ -543,9 +569,9 @@ class _LogInPageState extends StateMVC<LogInPage> {
   Padding(
     padding: EdgeInsets.all(16.0),
     child: Container(
-      width: ScreenUtil().setWidth(120),
+      width: ScreenUtil().setWidth(180),
       height: 1.0,
-      color: Colors.white.withOpacity(0.6),
+      color: Colors.white.withOpacity(0.2),
     ),
   );
 
@@ -582,7 +608,7 @@ class CustomTextStyle {
     .textTheme
     .title
     .copyWith(
-      fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white);
+      fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white);
   }
 
   static TextStyle subTitle(BuildContext context) {
@@ -591,7 +617,7 @@ class CustomTextStyle {
     .textTheme
     .title
     .copyWith(
-      fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white);
+      fontSize: 16, fontWeight: FontWeight.normal, color: Colors.grey);
   }
 
   static TextStyle button(BuildContext context) {

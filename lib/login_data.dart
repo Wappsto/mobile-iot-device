@@ -47,9 +47,11 @@ class LoginData extends ControllerMVC {
   static String get displaySignInEmailButton => "Sign in with Wappsto";
   static String get displaySeparatorText => "or";
   static String get displayErrorEmailLogIn => "Email or Password was incorrect. Please try again";
-  static String get displayTermsText => "By signing in, you agree to our ";
-  static String get displayPrivacyText => "and that you have read our ";
+  static String get displayTermsText => "By signing in, you agree to our  ";
+  static String get displayPrivacyText => "and that you have read our  ";
+  static String get displayPoweredByText => "Powered by  ";
 
+  static String get seluxitLink => "https://www.seluxit.com";
   static String get privacyLink => "https://www.seluxit.com/privacy";
   static String get termsLink => "https://www.seluxit.com/wp-content/uploads/2020/06/Cloud-Solutions-Terms-and-Conditions-Business.pdf";
 
