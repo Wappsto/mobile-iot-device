@@ -22,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
 
     _manager = Manager(state: this);
+    setup(context);
   }
 
   @override
@@ -31,10 +32,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> setup(BuildContext context) async {
-    if(_manager.connected) {
-      return;
-    }
-
     if(await _manager.setup()) {
       _buildList();
     } else {
@@ -44,8 +41,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    setup(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('SLX Mobile IoT Device'),
@@ -138,7 +133,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ),
     value: sen.enabled,
     onChanged: (bool value) {
-      print("changed to $value");
       setState(() {
           sen.enable = value;
       });
