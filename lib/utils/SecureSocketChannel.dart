@@ -12,16 +12,17 @@ class SecureSocketChannel extends StreamChannelMixin {
   final String cert;
   final String key;
   SecureSocket _socket;
+  StreamChannelController _controller = StreamChannelController(allowForeignErrors: false);
 
   SecureSocketChannel({this.host, this.port, this.ca, this.cert, this.key});
 
   String get protocol => _socket.selectedProtocol;
 
   @override
-  Stream get stream => SecureSocketStream._(_socket);
+  Stream get stream => _controller.foreign.stream;
 
   @override
-  SecureSocketSink get sink => SecureSocketSink._(_socket);
+  StreamSink get sink => _controller.foreign.sink;
 
   SecureSocket get sock {
     return _socket;
@@ -35,83 +36,19 @@ class SecureSocketChannel extends StreamChannelMixin {
 
     _socket = await SecureSocket.connect(host, port, context: serverContext, onBadCertificate: (X509Certificate c) {
         print("Certificate WARNING: ${c.issuer}:${c.subject}");
-        return true;
+        return false;
+    });
+
+    _socket.listen((data) {
+        _controller.local.sink.add(String.fromCharCodes(data).trim());
+    });
+
+    _controller.local.stream.listen((data) {
+        _socket.add(utf8.encode(data));
     });
 
     _socket.handleError(() => print("Socket Error"));
 
     return true;
-  }
-}
-
-class SecureSocketStream extends Stream {
-  final SecureSocket _socket;
-
-  SecureSocketStream._(SecureSocket socket)
-  : _socket = socket,
-  super();
-
-  @override
-  StreamSubscription<String> listen(void onData(String event),
-    {Function onError,
-      void onDone(),
-      bool cancelOnError}) {
-
-    var sub = _socket.listen((List<int> data){
-        print("Recv $data");
-        onData(new String.fromCharCodes(data).trim());
-      },
-      onDone: onDone, cancelOnError: cancelOnError);
-
-    SecureSocketSubscription newSub = SecureSocketSubscription._(sub);
-
-    return newSub;
-  }
-}
-
-class SecureSocketSubscription extends StreamSubscription<String> {
-  final _sub;
-
-  SecureSocketSubscription._(StreamSubscription sub)
-  : _sub = sub,
-  super();
-
-  @override
-  Future<E> asFuture<E>([E futureValue]) => _sub.asFuture(futureValue);
-
-  @override
-  Future<void> cancel() =>  _sub.cancel();
-
-  @override
-  bool get isPaused => _sub.isPaused;
-
-  @override
-  void onData(void handleData(String data)) {
-    _sub.onData((List<int> data) => { print("Receving: ${new String.fromCharCodes(data).trim()}"), handleData(new String.fromCharCodes(data).trim()) });
-  }
-
-  @override
-  void onDone(void handleDone()) => _sub.onDone(handleDone);
-
-  @override
-  void onError(Function handleError) {
-    _sub.onError((dynamic err) => {print("Error. $err") , handleError});
-  }
-
-  @override
-  void pause([Future resumeSignal]) => _sub.pause(resumeSignal);
-
-  @override
-  void resume() => _sub.resume();
-}
-
-class SecureSocketSink extends DelegatingStreamSink {
-  SecureSocketSink._(SecureSocket socket)
-  : super(socket);
-
-  @override
-  void add(dynamic data) {
-    print("Adding: $data");
-    super.add(utf8.encode(data));
   }
 }
