@@ -73,12 +73,12 @@ class LoginData extends ControllerMVC {
     _this._resetActive = true;
   }
 
-  Future<void> firebaseLogin(AuthCredential creds, BuildContext context) async {
+  Future<bool> firebaseLogin(AuthCredential creds, BuildContext context) async {
     final authResult = await FirebaseAuth.instance.signInWithCredential(creds);
     final User user = authResult.user;
 
     if (user == null) {
-      return;
+      return false;
     }
 
     assert(!user.isAnonymous);
@@ -90,21 +90,23 @@ class LoginData extends ControllerMVC {
     final String token = await user.getIdToken();
 
     if (token == null) {
-      return;
+      return false;
     }
 
     var session = await RestAPI.firebaseSession(token);
     if(session == null) {
-      return;
+      return false;
     }
 
     final SharedPreferences prefs = await _this._prefs;
     prefs.setString("session", session.id);
 
     _navigateToDashboard(context);
+
+    return true;
   }
 
-  static Future<void> signInWithGoogle(BuildContext context) async {
+  static Future<bool> signInWithGoogle(BuildContext context) async {
     await Firebase.initializeApp();
 
     final GoogleSignInAccount googleSignInAccount = await GoogleSignIn().signIn();
@@ -115,7 +117,7 @@ class LoginData extends ControllerMVC {
       idToken: googleSignInAuthentication.idToken,
     );
 
-    _this.firebaseLogin(creds, context);
+    return _this.firebaseLogin(creds, context);
   }
 
   static Future<void> signOutGoogle() async {
@@ -128,7 +130,7 @@ class LoginData extends ControllerMVC {
     print("Google User Signed Out");
   }
 
-  static Future<void> signInWithFacebook(BuildContext context) async {
+  static Future<bool> signInWithFacebook(BuildContext context) async {
     print("Sign In With Facebook");
     String result = await Navigator.push(
       context,
@@ -144,11 +146,13 @@ class LoginData extends ControllerMVC {
       try {
         await Firebase.initializeApp();
         final AuthCredential creds = FacebookAuthProvider.credential(result);
-        _this.firebaseLogin(creds, context);
+        return _this.firebaseLogin(creds, context);
       } catch (e) {
         print(e);
       }
     }
+
+    return false;
   }
 
   static Future<String> signInWithEmail(BuildContext context, String email, String password) async {
@@ -158,6 +162,9 @@ class LoginData extends ControllerMVC {
       prefs.setString("session", session.id);
 
       return null;
+    } on RestException catch(e) {
+      print(e);
+      return e.result;
     } catch (e) {
       print(e);
       return "Wrong username/Password";

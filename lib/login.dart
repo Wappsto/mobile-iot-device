@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:mobile_iot_device/login_data.dart';
+import 'package:mobile_iot_device/captcha.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final _emailKey = GlobalKey<FormState>();
@@ -271,7 +272,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
               color: Theme.of(context).accentColor,
               padding: EdgeInsets.all(12),
               onPressed: () async {
-                _showLoading(context);
+                _showLoading();
                 String res = await LoginData.tryToLogInUserViaEmail(context, _emailController, _passwordController);
                 if(res == null) {
                   print(_keyLoader.currentContext);
@@ -281,6 +282,15 @@ class _LogInPageState extends StateMVC<LogInPage> {
                     'Signin',
                     res
                   );
+/*
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context){
+                        return Captcha(title: "Captcha Check", callback: (String code)=>print("Code returned: "+code));
+                      }
+                    ),
+                  );
+*/
                 }
               },
             )
@@ -347,7 +357,16 @@ class _LogInPageState extends StateMVC<LogInPage> {
           Buttons.Google,
           padding: EdgeInsets.all(4),
           onPressed: () async {
-            LoginData.signInWithGoogle(context);
+            _showLoading();
+            bool res = await LoginData.signInWithGoogle(context);
+            if(!res) {
+              _showMessage(
+                context,
+                'Signin With Facebook',
+                await LoginData.signUpWithEmailAndPassword(
+                  _newEmailController, _newPasswordController),
+              );
+            }
           },
         ),
         SizedBox(
@@ -356,8 +375,17 @@ class _LogInPageState extends StateMVC<LogInPage> {
         SignInButton(
           Buttons.Facebook,
           padding: EdgeInsets.all(12),
-          onPressed: () {
-            LoginData.signInWithFacebook(context);
+          onPressed: () async {
+            _showLoading();
+            bool res = await LoginData.signInWithFacebook(context);
+            if(!res) {
+              _showMessage(
+                context,
+                'Signin With Facebook',
+                await LoginData.signUpWithEmailAndPassword(
+                  _newEmailController, _newPasswordController),
+              );
+            }
           },
         ),
       ],
@@ -438,7 +466,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
               color: Theme.of(context).accentColor,
               padding: EdgeInsets.all(12),
               onPressed: () async {
-                _showLoading(context);
+                _showLoading();
                 _showMessage(
                   context,
                   'Signup',
@@ -498,7 +526,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
               color: Theme.of(context).accentColor,
               padding: EdgeInsets.all(12),
               onPressed: () async {
-                _showLoading(context);
+                _showLoading();
                 _showMessage(
                   context,
                   'Reset password',
@@ -514,7 +542,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
 
   final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
-  void _showLoading(BuildContext context) {
+  void _showLoading() {
     showDialog<void>(
       context: context,
       barrierDismissible: false,

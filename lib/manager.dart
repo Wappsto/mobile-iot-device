@@ -106,7 +106,16 @@ class Manager {
 
       await wappsto.postNetwork(network);
 
-      //await RestAPI.claimNetwork(network.id);
+      final SharedPreferences prefs = await _prefs;
+      final String session = prefs.getString("session");
+      if(session != null) {
+        print("Clain network");
+        await RestAPI.claimNetwork(session, network.id);
+        prefs.remove("session");
+      } else {
+        print("session is null");
+      }
+
       start();
     } catch(e, backtrace) {
       print("ERR");

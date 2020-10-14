@@ -7,7 +7,7 @@ abstract class Sensor {
   SharedPreferences _prefs;
   StreamSubscription subscription;
   Function _cb;
-  String _sensorText = "Idle";
+  String _sensorText = "Tap to enable";
   String name = "";
   IconData icon;
   bool enabled = true;

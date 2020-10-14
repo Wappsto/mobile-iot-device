@@ -153,13 +153,13 @@ class RestAPI {
     return null;
   }
 
-  static Future<String> claimNetwork(Session session, String network) async {
+  static Future<String> claimNetwork(String session, String network) async {
     String url = "$host/2.0/network/$network";
 
     Map jsonData = {};
 
     try {
-      final data = await fetchFromWappsto(url, session: session.id, jsonData: jsonData);
+      final data = await fetchFromWappsto(url, session: session, jsonData: jsonData);
       return data;
     } catch(e) {
       print("Failed to claim network");
