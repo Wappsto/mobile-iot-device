@@ -93,10 +93,10 @@ class RestAPI {
     return creators;
   }
 
-  static Future<Creator> createCreator(Session session) async {
+  static Future<Creator> createCreator(Session session, String product) async {
     String url = "$host/2.1/creator";
     Map jsonData = {
-      'product': 'Mobile IoT Device'
+      'product': product
     };
     final data = await fetchFromWappsto(url, jsonData: jsonData, session: session.id);
     return Creator.fromJson(json.decode(data));

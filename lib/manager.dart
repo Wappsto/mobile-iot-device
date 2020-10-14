@@ -10,6 +10,7 @@ import 'package:mobile_iot_device/models/session.dart';
 import 'package:mobile_iot_device/models/sensor.dart';
 import 'package:mobile_iot_device/models/network.dart';
 import 'package:mobile_iot_device/models/device.dart';
+import 'package:mobile_iot_device/models/creator.dart';
 import 'package:mobile_iot_device/sensors/light.dart';
 import 'package:mobile_iot_device/sensors/noise.dart';
 import 'package:mobile_iot_device/sensors/location.dart';
@@ -109,11 +110,8 @@ class Manager {
       final SharedPreferences prefs = await _prefs;
       final String session = prefs.getString("session");
       if(session != null) {
-        print("Clain network");
         await RestAPI.claimNetwork(session, network.id);
         prefs.remove("session");
-      } else {
-        print("session is null");
       }
 
       start();
@@ -137,7 +135,7 @@ class Manager {
     var ca = prefs.getString('ca') ?? "";
 
     if(ca == "") {
-      print("Loading new certificates from Wappsto");
+      print("Loading creators from Wappsto.");
       final String strSession = prefs.getString("session");
       final Session session = await RestAPI.validateSession(strSession);
       if(session == null) {
@@ -145,7 +143,20 @@ class Manager {
         return null;
       }
 
-      final creator = await RestAPI.createCreator(session);
+      final List<Creator> creators = await RestAPI.fetchCreator(session);
+      Creator creator;
+      for(var i=0; i<creators.length; i++) {
+        if(creators[i].product == 'Mobile IoT Device') {
+          creator = creators[i];
+          break;
+        }
+      }
+
+      if(creator == null) {
+        print("Loading new certificates from Wappsto");
+        creator = await RestAPI.createCreator(session, 'Mobile IoT Device');
+      }
+
       prefs.setString("ca", creator.ca);
       prefs.setString("certificate", creator.certificate);
       prefs.setString("private_key", creator.privateKey);
