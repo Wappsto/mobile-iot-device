@@ -270,12 +270,18 @@ class _LogInPageState extends StateMVC<LogInPage> {
               ),
               color: Theme.of(context).accentColor,
               padding: EdgeInsets.all(12),
-              onPressed: () {
-                print(_emailKey.currentWidget);
-                print(_emailKey.currentContext);
-                //if (_emailKey.currentWidget.validate()) {
-                LoginData.tryToLogInUserViaEmail(context, _emailController, _passwordController);
-                //}
+              onPressed: () async {
+                _showLoading(context);
+                String res = await LoginData.tryToLogInUserViaEmail(context, _emailController, _passwordController);
+                if(res == null) {
+                  print(_keyLoader.currentContext);
+                } else {
+                  _showMessage(
+                    context,
+                    'Signin',
+                    res
+                  );
+                }
               },
             )
           ),

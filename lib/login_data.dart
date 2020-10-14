@@ -93,7 +93,7 @@ class LoginData extends ControllerMVC {
       return;
     }
 
-    var session = await firebaseSession(token);
+    var session = await RestAPI.firebaseSession(token);
     if(session == null) {
       return;
     }
@@ -153,7 +153,7 @@ class LoginData extends ControllerMVC {
 
   static Future<String> signInWithEmail(BuildContext context, String email, String password) async {
     try {
-      var session = await fetchSession(email.trim(), password);
+      var session = await RestAPI.fetchSession(email.trim(), password);
       final SharedPreferences prefs = await _this._prefs;
       prefs.setString("session", session.id);
 
@@ -165,7 +165,7 @@ class LoginData extends ControllerMVC {
   }
 
   static Future<String> resetWithEmail(email) async {
-    String msg = await resetPassword(email.text.trim());
+    String msg = await RestAPI.resetPassword(email.text.trim());
     if(msg == null) {
       return "Failed to reset password";
     } else {
@@ -177,19 +177,21 @@ class LoginData extends ControllerMVC {
     await Navigator.pushNamedAndRemoveUntil(context, DashboardScreen.routeName, (_) => false);
   }
 
-  static Future tryToLogInUserViaEmail(BuildContext context, TextEditingController email, TextEditingController password) async {
+  static Future<String> tryToLogInUserViaEmail(BuildContext context, TextEditingController email, TextEditingController password) async {
     String res = await signInWithEmail(context, email.text, password.text);
     if(res == null) {
       email.clear();
       password.clear();
+
       _navigateToDashboard(context);
     } else {
       print(res);
+      return res;
     }
   }
 
   static Future<String> signUpWithEmailAndPassword(email, password) async {
-    String msg = await signup(email.text.trim(), password.text);
+    String msg = await RestAPI.signup(email.text.trim(), password.text);
     if(msg == null) {
       return "Failed to signup to Wappsto";
     } else {

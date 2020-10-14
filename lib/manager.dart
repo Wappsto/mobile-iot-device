@@ -106,6 +106,7 @@ class Manager {
 
       await wappsto.postNetwork(network);
 
+      //await RestAPI.claimNetwork(network.id);
       start();
     } catch(e, backtrace) {
       print("ERR");
@@ -129,13 +130,13 @@ class Manager {
     if(ca == "") {
       print("Loading new certificates from Wappsto");
       final String strSession = prefs.getString("session");
-      final Session session = await validateSession(strSession);
+      final Session session = await RestAPI.validateSession(strSession);
       if(session == null) {
         prefs.remove("session");
         return null;
       }
 
-      final creator = await createCreator(session);
+      final creator = await RestAPI.createCreator(session);
       prefs.setString("ca", creator.ca);
       prefs.setString("certificate", creator.certificate);
       prefs.setString("private_key", creator.privateKey);
