@@ -1,6 +1,6 @@
-# iot
+# SLX Mobile IoT Device 
 
-Converts a phone into a Wappsto IoT Device
+Converts a phone into a Mobile IoT Device. 
 
 ## Getting Started
 
