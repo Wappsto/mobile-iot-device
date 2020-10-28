@@ -191,10 +191,10 @@ class LoginData extends ControllerMVC {
       password.clear();
 
       _navigateToDashboard(context);
-    } else {
-      print(res);
-      return res;
     }
+
+    print(res);
+    return res;
   }
 
   static Future<String> signUpWithEmailAndPassword(email, password) async {

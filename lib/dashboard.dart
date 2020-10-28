@@ -117,27 +117,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     },
   );
-
-  CheckboxListTile _tileCheck(Sensor sen) => CheckboxListTile(
-    title: Text(
-      sen.toString(),
-      style: TextStyle(
-        fontWeight: FontWeight.w500,
-        fontSize: 20,
-      )
-    ),
-    subtitle: Text(
-      sen.name
-    ),
-    secondary: Icon(
-      sen.icon,
-      color: Colors.blue[500],
-    ),
-    value: sen.enabled,
-    onChanged: (bool value) {
-      setState(() {
-          sen.enable = value;
-      });
-    },
-  );
 }

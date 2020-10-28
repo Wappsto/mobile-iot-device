@@ -181,6 +181,49 @@ class _LogInPageState extends StateMVC<LogInPage> {
     );
   }
 
+  Widget _showTerms() {
+    return Container(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 20),
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          children: <Widget>[
+            Text(LoginData.displayTermsText,
+              style: CustomTextStyle.body(context),
+              textAlign: TextAlign.center,
+            ),
+            InkWell(
+              child: Text(
+                "Terms",
+                style: CustomTextStyle.link(context),
+              ),
+              onTap: () async {
+                if (await canLaunch(LoginData.termsLink)) {
+                  await launch(LoginData.termsLink);
+                }
+              }
+            ),
+            Text(LoginData.displayPrivacyText,
+              style: CustomTextStyle.body(context),
+              textAlign: TextAlign.center,
+            ),
+            InkWell(
+              child: Text(
+                "Privacy Notice.",
+                style: CustomTextStyle.link(context),
+              ),
+              onTap: () async {
+                if (await canLaunch(LoginData.privacyLink)) {
+                  await launch(LoginData.privacyLink);
+                }
+              }
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _showSignIn(context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -313,45 +356,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
         SizedBox(
           height: ScreenUtil().setHeight(30),
         ),
-        Container(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 20),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              children: <Widget>[
-                Text(LoginData.displayTermsText,
-                  style: CustomTextStyle.body(context),
-                  textAlign: TextAlign.center,
-                ),
-                InkWell(
-                  child: Text(
-                    "Terms",
-                    style: CustomTextStyle.link(context),
-                  ),
-                  onTap: () async {
-                    if (await canLaunch(LoginData.termsLink)) {
-                      await launch(LoginData.termsLink);
-                    }
-                  }
-                ),
-                Text(LoginData.displayPrivacyText,
-                  style: CustomTextStyle.body(context),
-                  textAlign: TextAlign.center,
-                ),
-                InkWell(
-                  child: Text(
-                    "Privacy Notice.",
-                    style: CustomTextStyle.link(context),
-                  ),
-                  onTap: () async {
-                    if (await canLaunch(LoginData.privacyLink)) {
-                      await launch(LoginData.privacyLink);
-                    }
-                  }
-                ),
-              ],
-            ),
-          ),
+        _showTerms(
         ),
         SignInButton(
           Buttons.Google,
@@ -396,6 +401,8 @@ class _LogInPageState extends StateMVC<LogInPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        _showTerms(
+        ),
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
@@ -631,7 +638,7 @@ class CustomTextStyle {
     return Theme
     .of(context)
     .textTheme
-    .title
+    .headline6
     .copyWith(
       fontSize: 18.0, fontWeight: FontWeight.normal, color: Colors.white);
   }
@@ -640,7 +647,7 @@ class CustomTextStyle {
     return Theme
     .of(context)
     .textTheme
-    .title
+    .headline6
     .copyWith(
       fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white);
   }
@@ -649,7 +656,7 @@ class CustomTextStyle {
     return Theme
     .of(context)
     .textTheme
-    .title
+    .headline6
     .copyWith(
       fontSize: 16, fontWeight: FontWeight.normal, color: Colors.grey);
   }
@@ -658,7 +665,7 @@ class CustomTextStyle {
     return Theme
     .of(context)
     .textTheme
-    .title
+    .headline6
     .copyWith(
       fontSize: 20, fontWeight: FontWeight.normal, color: Colors.white);
   }
@@ -667,7 +674,7 @@ class CustomTextStyle {
     return Theme
     .of(context)
     .textTheme
-    .title
+    .headline6
     .copyWith(
       fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white);
   }
@@ -676,7 +683,7 @@ class CustomTextStyle {
     return Theme
     .of(context)
     .textTheme
-    .title
+    .headline6
     .copyWith(
       fontSize: 14, color: Theme.of(context).accentColor);
   }
