@@ -63,7 +63,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _logout(BuildContext context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String> ids = prefs.getStringList("creator_ids");
     prefs.clear();
+    prefs.setStringList("creator_ids", ids);
 
     _manager.stop();
 

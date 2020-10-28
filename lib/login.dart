@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:mobile_iot_device/login_data.dart';
-import 'package:mobile_iot_device/captcha.dart';
+//import 'package:mobile_iot_device/captcha.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final _emailKey = GlobalKey<FormState>();

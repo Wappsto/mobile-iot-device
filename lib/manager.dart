@@ -143,10 +143,12 @@ class Manager {
         return null;
       }
 
+      List<String> creator_ids = prefs.getStringList("creator_ids");
+      creator_ids ??= List<String>();
       final List<Creator> creators = await RestAPI.fetchCreator(session);
       Creator creator;
       for(var i=0; i<creators.length; i++) {
-        if(creators[i].product == 'Mobile IoT Device') {
+        if(creator_ids.contains(creators[i].id)) {
           creator = creators[i];
           break;
         }
@@ -155,6 +157,8 @@ class Manager {
       if(creator == null) {
         print("Loading new certificates from Wappsto");
         creator = await RestAPI.createCreator(session, 'Mobile IoT Device');
+        creator_ids.add(creator.id);
+        prefs.setStringList("creator_ids", creator_ids);
       }
 
       prefs.setString("ca", creator.ca);

@@ -216,13 +216,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.3"
-  flutter_recaptcha_v2:
-    dependency: "direct main"
-    description:
-      name: flutter_recaptcha_v2
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.0"
   flutter_screenutil:
     dependency: "direct main"
     description:
@@ -637,13 +630,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0-nullsafety.3"
-  webview_flutter:
-    dependency: transitive
-    description:
-      name: webview_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.24"
   win32:
     dependency: transitive
     description:

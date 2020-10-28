@@ -18,7 +18,6 @@ class Creator {
 
     if(jsonData.containsKey('data')) {
       if(jsonData['data'] is String) {
-        print(jsonData['data']);
         final d = json.decode(jsonData['data']);
         if(d.containsKey('meta')) {
           network = d['meta']['id'];
