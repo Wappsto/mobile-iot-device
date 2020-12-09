@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mobile_iot_device/splash.dart';
-import 'package:mobile_iot_device/login.dart';
-import 'package:mobile_iot_device/dashboard.dart';
-import 'package:mobile_iot_device/utils/transition_route_observer.dart';
+import 'package:slx_snitch/splash.dart';
+import 'package:slx_snitch/screens/login.dart';
+import 'package:slx_snitch/screens/dashboard.dart';
+import 'package:slx_snitch/utils/transition_route_observer.dart';
 
 
 void main() {

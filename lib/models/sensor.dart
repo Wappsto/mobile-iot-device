@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'package:mobile_iot_device/models/device.dart';
+import 'package:slx_snitch/models/device.dart';
+import 'package:slx_snitch/models/value.dart';
 
 abstract class Sensor {
   SharedPreferences _prefs;
@@ -9,6 +10,8 @@ abstract class Sensor {
   Function _cb;
   String _sensorText = "Tap to enable";
   String name = "";
+  List<String> valueName = List<String>();
+  List<Value> value = List<Value>();
   IconData icon;
   bool enabled = true;
 
@@ -33,9 +36,15 @@ abstract class Sensor {
     _cb = cb;
     _prefs = prefs;
 
-    enabled = _prefs.getBool("${name}_enabled");
-    if(enabled == null) {
-      enabled = false;
+    if(_prefs != null) {
+      enabled = _prefs.getBool("${name}_enabled");
+      if(enabled == null) {
+        enabled = false;
+      }
+
+      if(enabled) {
+        _sensorText = "Loading...";
+      }
     }
   }
 
@@ -59,7 +68,9 @@ abstract class Sensor {
     }
 
     this.enabled = enabled;
-    _prefs.setBool("${name}_enabled", enabled);
+    if(_prefs != null) {
+      _prefs.setBool("${name}_enabled", enabled);
+    }
 
     if(enabled) {
       start();
@@ -72,6 +83,20 @@ abstract class Sensor {
     this.enable = !this.enabled;
   }
 
+  void linkValue(Device device, bool create) {
+    valueName.forEach((n) {
+        Value val = device.findValue(name: n);
+        if(val == null) {
+          if(create) {
+            val = createValue(device, n);
+          } else {
+            print("Do not enable $n");
+          }
+        }
+        value.add(val);
+    });
+  }
+
   void start();
-  void linkValue(Device device);
+  Value createValue(Device device, String name);
 }

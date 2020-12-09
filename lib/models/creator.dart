@@ -25,6 +25,9 @@ class Creator {
         }
       }
     }
+    if(jsonData.containsKey('network')) {
+      network = jsonData['network']['id'];
+    }
 
     if(jsonData.containsKey('product')) {
       product = jsonData['product'];

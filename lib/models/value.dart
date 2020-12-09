@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
-import 'package:mobile_iot_device/models/device.dart';
-import 'package:mobile_iot_device/models/state.dart';
-import 'package:mobile_iot_device/wappsto.dart';
+import 'package:slx_snitch/models/device.dart';
+import 'package:slx_snitch/models/state.dart';
+import 'package:slx_snitch/wappsto.dart';
 
 enum ValuePermission {
   ReadOnly,
@@ -90,7 +90,11 @@ class Value {
       parent: parent,
     );
 
-    json['state'].forEach((state) => value.states.add(State.fromJson(state, value)));
+    json['state'].forEach((state) {
+        if(state is Map<String, dynamic>) {
+          value.states.add(State.fromJson(state, value));
+        }
+    });
 
     if(json['number'] != null) {
       value.number = json['number'];
@@ -202,6 +206,10 @@ class Value {
     }
 
     return false;
+  }
+
+  bool delete() {
+    wappsto.deleteValue(this);
   }
 
   Wappsto get wappsto {

@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
-import 'package:mobile_iot_device/models/network.dart';
-import 'package:mobile_iot_device/models/value.dart';
-import 'package:mobile_iot_device/wappsto.dart';
+import 'package:slx_snitch/models/network.dart';
+import 'package:slx_snitch/models/value.dart';
+import 'package:slx_snitch/wappsto.dart';
 
 class Device {
   final String id;
@@ -141,7 +141,21 @@ class Device {
     }
 
     if(name != null) {
-      return values.firstWhere((val) => val.name == name, orElse: () => null);
+      List<Value> vals = values.where((val) => val.name == name).toList();
+      switch(vals.length) {
+        case 0:
+        return null;
+        case 1:
+        return vals[0];
+        default:
+        List<Value> wrongs = vals.skip(1).toList();
+        wrongs.forEach((val) {
+            values.remove(val);
+            print("Deleting ${val}");
+            val.delete();
+        });
+        return vals[0];
+      }
     }
 
     return values[0];

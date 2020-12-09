@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:mobile_iot_device/models/session.dart';
-import 'package:mobile_iot_device/models/creator.dart';
+import 'package:slx_snitch/models/network.dart';
+import 'package:slx_snitch/models/session.dart';
+import 'package:slx_snitch/models/creator.dart';
 
 final String host = 'https://wappsto.com/services';
 
@@ -66,6 +67,7 @@ class RestAPI {
     Map jsonData = {
       'username': username,
       'password': password,
+      'remember_me': true
     };
     final data = await fetchFromWappsto(url, jsonData: jsonData);
     return Session.fromJson(json.decode(data));
@@ -167,5 +169,38 @@ class RestAPI {
     }
 
     return null;
+  }
+
+  static Future<List<Network> > fetchNetworks(String session) async {
+    String url = "$host/2.0/network?expand=1";
+
+    final data = await fetchFromWappsto(url, session: session);
+    final list = json.decode(data);
+
+    List<Network> networks = new List<Network>();
+    list.forEach((elm) => {
+        elm.removeWhere((key, value) => key == "device"),
+        networks.add(Network.fromJson(elm, null))
+    });
+    return networks;
+  }
+
+  static Future<Network> fetchNetwork(String session, String network) async {
+    String url = "$host/2.0/network/$network";
+
+    final data = await fetchFromWappsto(url, session: session);
+    Map<String, dynamic> j = json.decode(data);
+
+    j.removeWhere((key, value) => key == "device");
+    return Network.fromJson(j, null);
+  }
+
+  static Future<Network> fetchFullNetwork(String session, String network, var wappsto) async {
+    String url = "$host/2.0/network/$network?expand=5";
+
+    final data = await fetchFromWappsto(url, session: session);
+    Map<String, dynamic> j = json.decode(data);
+
+    return Network.fromJson(j, wappsto);
   }
 }

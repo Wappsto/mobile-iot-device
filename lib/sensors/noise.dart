@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:noise_meter/noise_meter.dart';
-import 'package:mobile_iot_device/models/sensor.dart';
-import 'package:mobile_iot_device/models/device.dart';
-import 'package:mobile_iot_device/models/value.dart';
-import 'package:mobile_iot_device/models/state.dart';
+import 'package:slx_snitch/models/sensor.dart';
+import 'package:slx_snitch/models/device.dart';
+import 'package:slx_snitch/models/value.dart';
+import 'package:slx_snitch/models/state.dart';
 
 class NoiseSensor extends Sensor {
   NoiseMeter _noiseMeter = new NoiseMeter();
@@ -11,12 +11,11 @@ class NoiseSensor extends Sensor {
   String _noiseMax = "";
   String _noiseMean = "";
 
-  Value _value;
-  Value _rawValue;
-
   NoiseSensor() {
     icon = Icons.mic;
     name = "Noise Sensor";
+    valueName.add('Noise');
+    valueName.add('Sound');
   }
 
   String dbToText(double db) {
@@ -43,10 +42,10 @@ class NoiseSensor extends Sensor {
       _noiseMax = max;
 
       if(noiseReading.meanDecibel.isFinite) {
-        if(_rawValue != null) {
-          if(_rawValue.update(noiseReading.meanDecibel.toInt().toString())) {
-            if(_value != null) {
-              _value.update(mean);
+        if(value[1] != null) {
+          if(value[1].update(noiseReading.meanDecibel.toInt().toString())) {
+            if(value[0] != null) {
+              value[0].update(mean);
             }
           }
         }
@@ -67,18 +66,16 @@ class NoiseSensor extends Sensor {
     }
   }
 
-  void linkValue(Device device) {
-    _value = device.findValue(name: 'Noise');
-    if(_value == null) {
-      _value = device.createStringValue('Noise', 'noise_meaning', 30);
-      _value.createState(StateType.Report, data: "SOFT");
+  Value createValue(Device device, String name) {
+    Value value;
+    if(name == 'Noise') {
+      value = device.createStringValue(name, 'noise_meaning', 30);
+      value.createState(StateType.Report, data: "SOFT");
+    } else {
+      value = device.createNumberValue(name, 'sound_level', 0, 200, 1, 'db');
+      value.createState(StateType.Report, data: "0");
+      value.setDelta(20);
     }
-    _rawValue = device.findValue(name: 'Sound');
-    if(_rawValue == null) {
-      _rawValue = device.createNumberValue('Sound', 'sound_level', 0, 200, 1, 'db');
-      _rawValue.createState(StateType.Report, data: "0");
-    }
-
-    _rawValue.setDelta(20);
+    return value;
   }
 }

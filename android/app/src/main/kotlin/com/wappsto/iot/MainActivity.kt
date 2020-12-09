@@ -1,4 +1,4 @@
-package com.wappsto.mobile_iot_device
+package com.wappsto.slx_snitch
 
 import io.flutter.embedding.android.FlutterActivity
 

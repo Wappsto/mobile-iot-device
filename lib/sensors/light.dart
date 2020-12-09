@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:light/light.dart';
-import 'package:mobile_iot_device/models/sensor.dart';
-import 'package:mobile_iot_device/models/device.dart';
-import 'package:mobile_iot_device/models/value.dart';
-import 'package:mobile_iot_device/models/state.dart';
+import 'package:slx_snitch/models/sensor.dart';
+import 'package:slx_snitch/models/device.dart';
+import 'package:slx_snitch/models/value.dart';
+import 'package:slx_snitch/models/state.dart';
 
 class LightSensor extends Sensor {
   Light _light;
-  Value _value;
 
   LightSensor() {
     icon = Icons.wb_sunny;
     name = "Light Sensor";
+
+    valueName.add('Light');
   }
 
   void onData(int luxValue) async {
     print("Lux value from Light Sensor: $luxValue");
 
-    if(_value != null) {
-      _value.update(luxValue.toString());
+    if(value[0] != null) {
+      value[0].update(luxValue.toString());
     }
 
     text = "$luxValue lux";
@@ -35,14 +36,11 @@ class LightSensor extends Sensor {
     }
   }
 
-  void linkValue(Device device) {
-    _value = device.findValue(name: 'Light');
-    if(_value == null) {
-      _value = device.createNumberValue('Light', 'illuminance', 0, 100000, 1, 'lx');
-      _value.createState(StateType.Report, data: "0");
-    }
+  Value createValue(Device device, String name) {
+    Value value = device.createNumberValue(name, 'illuminance', 0, 100000, 1, 'lx');
+    value.createState(StateType.Report, data: "0");
+    value.setDelta(10);
 
-    _value.setDelta(10);
+    return value;
   }
-
 }

@@ -1,4 +1,4 @@
-import 'package:mobile_iot_device/models/value.dart';
+import 'package:slx_snitch/models/value.dart';
 import 'dart:convert';
 
 enum StateType {

@@ -4,38 +4,45 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:mobile_iot_device/rest.dart';
-import 'package:mobile_iot_device/wappsto.dart';
-import 'package:mobile_iot_device/models/session.dart';
-import 'package:mobile_iot_device/models/sensor.dart';
-import 'package:mobile_iot_device/models/network.dart';
-import 'package:mobile_iot_device/models/device.dart';
-import 'package:mobile_iot_device/models/creator.dart';
-import 'package:mobile_iot_device/sensors/light.dart';
-import 'package:mobile_iot_device/sensors/noise.dart';
-import 'package:mobile_iot_device/sensors/location.dart';
-import 'package:mobile_iot_device/sensors/wifi.dart';
-import 'package:mobile_iot_device/sensors/accelerometer.dart';
-import 'package:mobile_iot_device/sensors/gyroscope.dart';
-//import 'package:mobile_iot_device/sensors/magnetometer.dart';
-import 'package:mobile_iot_device/sensors/compass.dart';
-import 'package:mobile_iot_device/sensors/battery.dart';
+import 'package:slx_snitch/rest.dart';
+import 'package:slx_snitch/wappsto.dart';
+import 'package:slx_snitch/models/session.dart';
+import 'package:slx_snitch/models/sensor.dart';
+import 'package:slx_snitch/models/network.dart';
+import 'package:slx_snitch/models/device.dart';
+import 'package:slx_snitch/models/creator.dart';
+import 'package:slx_snitch/sensors/light.dart';
+import 'package:slx_snitch/sensors/noise.dart';
+import 'package:slx_snitch/sensors/location.dart';
+import 'package:slx_snitch/sensors/wifi.dart';
+import 'package:slx_snitch/sensors/accelerometer.dart';
+import 'package:slx_snitch/sensors/gyroscope.dart';
+//import 'package:slx_snitch/sensors/magnetometer.dart';
+import 'package:slx_snitch/sensors/compass.dart';
+import 'package:slx_snitch/sensors/battery.dart';
 
 class Manager {
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  String _host = "collector.wappsto.com";
+  int _port = 443;
+  SharedPreferences _prefs;
   List<Sensor> _sensors = new List<Sensor>();
+  String networkID;
   Wappsto wappsto;
   Network network;
   var state;
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   Map<String, dynamic> deviceData;
   bool _connected = false;
+  String _ca;
+  String _cert;
+  String _key;
+  String error;
 
-  Manager({this.state});
+  Manager({this.state, this.networkID});
 
   Future<bool> setup() async {
     _connected = false;
-    final SharedPreferences prefs = await _prefs;
+    _prefs = await SharedPreferences.getInstance();
 
     _sensors.add(new NoiseSensor());
     _sensors.add(new LightSensor());
@@ -47,17 +54,54 @@ class Manager {
     _sensors.add(new CompassSensor());
     _sensors.add(new BatterySensor());
 
-    _sensors.forEach((s) => s.setup(update, prefs));
+    var p;
+    if(networkID == null) {
+      p = _prefs;
+    }
+    _sensors.forEach((s) => s.setup(update, p));
+
+    final String session = _prefs.getString("session");
+
+    if(networkID == null) {
+      List<String> certs = await loadCerts();
+      if(certs == null) {
+        return false;
+      }
+      _ca = certs[0];
+      _cert = certs[1];
+      _key = certs[2];
+    } else {
+      print("Loading certs for $networkID");
+
+      try {
+        network = await RestAPI.fetchNetwork(session, networkID);
+      } catch(e) {
+        print(e);
+        error = e.result;
+        return false;
+      }
+      Session sen = Session(id: session);
+      List<Creator> creators = await RestAPI.fetchCreator(sen);
+      Creator creator = creators.firstWhere((creator) => creator.network == networkID);
+
+      if(creator == null) {
+        return false;
+      }
+
+      _ca = creator.ca;
+      _cert = creator.certificate;
+      _key = creator.privateKey;
+    }
 
     initPlatformState();
 
-    _connected = await connect();
+    wappsto = new Wappsto(host: _host, port: _port, ca: _ca, cert: _cert, key: _key);
 
-    if(_connected) {
-      start();
+    if(networkID != null) {
+      network = await RestAPI.fetchFullNetwork(session, networkID, wappsto);
     }
 
-    return _connected;
+    return true;
   }
 
   bool get connected {
@@ -68,82 +112,97 @@ class Manager {
     return _sensors;
   }
 
-  void start() async {
+  Future<bool> start() async {
+    if(!await connect()) {
+      return false;
+    }
+
+    if(!await createNetwork()) {
+      wappsto.stop();
+      return false;
+    }
+
+    _connected = true;
     _sensors.forEach((s) => s.run());
+
+    return true;
   }
 
   void stop() async {
+    print("Stopping");
     _connected = false;
     _sensors.forEach((s) => s.stop());
+    if(wappsto != null) {
+      wappsto.stop();
+    }
   }
 
   void update() {
-    if(_connected) {
-      state.setState(() {
-      });
+    if(_connected && state.mounted) {
+      state.setState(() { });
     }
   }
 
   Future<bool> connect() async {
-    List<String> certs = await loadCerts();
-    if(certs == null) {
-      return false;
-    }
-    String ca = certs[0];
-    String cert = certs[1];
-    String key = certs[2];
-
-    String host = "collector.wappsto.com";
-    int port = 443;
-
-    wappsto = new Wappsto(host: host, port: port, ca: ca, cert: cert, key: key);
-
     try {
       await wappsto.connect();
 
-      print("Connected to Wappsto on $host:$port");
+      print("Connected to Wappsto on $_host:$_port");
 
-      network = await createNetwork();
-
-      await wappsto.postNetwork(network);
-
-      final SharedPreferences prefs = await _prefs;
-      final String session = prefs.getString("session");
-      if(session != null) {
-        await RestAPI.claimNetwork(session, network.id);
-        prefs.remove("session");
-      }
-
-      start();
+      return true;
     } catch(e, backtrace) {
       print("ERR");
       print(e);
       print(backtrace);
+    }
 
-      if(network != null) {
-        print(network.toJsonString());
+    return false;
+  }
+
+  Future<bool> createNetwork() async {
+    final String session = _prefs.getString("session");
+
+    if(networkID == null) {
+      network = await generateNetwork();
+
+      try {
+        await wappsto.postNetwork(network);
+        await RestAPI.claimNetwork(session, network.id);
+      } catch(e, backtrace) {
+        print("ERR");
+        print(e);
+        print(backtrace);
+
+        if(network != null) {
+          print(network.toJsonString());
+        }
+
+        //print(e.data);
       }
-
-      //print(e.data);
+    } else {
+      linkValues(network.devices[0], false);
     }
 
     return true;
   }
 
+  void linkValues(Device device, bool create) {
+    _sensors.forEach((s) => s.linkValue(device, create));
+  }
+
   Future<List<String> > loadCerts() async {
-    final SharedPreferences prefs = await _prefs;
-    var ca = prefs.getString('ca') ?? "";
+    var ca = _prefs.getString('ca') ?? "";
 
     if(ca == "") {
       print("Loading creators from Wappsto.");
-      final String strSession = prefs.getString("session");
+      final String strSession = _prefs.getString("session");
       final Session session = await RestAPI.validateSession(strSession);
       if(session == null) {
-        prefs.remove("session");
+        _prefs.remove("session");
         return null;
       }
 
-      List<String> creatorIds = prefs.getStringList("creator_ids");
+      List<String> creatorIds = _prefs.getStringList("creator_ids");
       creatorIds ??= List<String>();
       final List<Creator> creators = await RestAPI.fetchCreator(session);
       Creator creator;
@@ -158,47 +217,56 @@ class Manager {
         print("Loading new certificates from Wappsto");
         creator = await RestAPI.createCreator(session, 'Mobile IoT Device');
         creatorIds.add(creator.id);
-        prefs.setStringList("creator_ids", creatorIds);
+        _prefs.setStringList("creator_ids", creatorIds);
       }
 
-      prefs.setString("ca", creator.ca);
-      prefs.setString("certificate", creator.certificate);
-      prefs.setString("private_key", creator.privateKey);
+      _prefs.setString("ca", creator.ca);
+      _prefs.setString("certificate", creator.certificate);
+      _prefs.setString("private_key", creator.privateKey);
     }
 
-    return [prefs.getString("ca"), prefs.getString("certificate"), prefs.getString("private_key")];
+    return [_prefs.getString("ca"), _prefs.getString("certificate"), _prefs.getString("private_key")];
   }
 
-  Future<Network> createNetwork() async {
-    final SharedPreferences prefs = await _prefs;
-
-    String rn = prefs.getString("network") ?? "";
+  Future<Network> generateNetwork() async {
+    String rn = _prefs.getString("network") ?? "";
     Network network;
     Device device;
+    String networkName;
+    String deviceName;
+    if (Platform.isAndroid) {
+      networkName = 'Android IoT Network';
+      deviceName = 'Android IoT Device';
+    } else {
+      networkName = 'Apple IoT Network';
+      deviceName = 'Apple IoT Device';
+    }
 
     if(rn == "") {
-      network = wappsto.createNetwork('Android IoT Network');
-      device = network.createDevice('Android IoT Device');
+      network = wappsto.createNetwork(networkName);
+      device = network.createDevice(deviceName);
     } else {
       network = Network.fromJson(json.decode(rn), wappsto);
-      device = network.findDevice(name: 'Android IoT Device');
+      device = network.findDevice(name: deviceName);
     }
 
     if (Platform.isAndroid) {
       device.manufacturer = deviceData['manufacturer'];
       device.product = deviceData['model'];
-      device.version = deviceData['version.incremental'];
+      device.version = deviceData['version.release'];
+      device.serial = deviceData['androidId'];
     } else {
       device.manufacturer = 'APPLE';
       device.product = deviceData['model'];
       device.version = deviceData['systemVersion'];
+      device.serial = deviceData['identifierForVendor'];
     }
     device.communication = 'WiFi';
     device.protocol = 'JsonRPC';
 
-    _sensors.forEach((s) => s.linkValue(device));
+    linkValues(device, true);
 
-    prefs.setString("network", network.toJsonString());
+    _prefs.setString("network", network.toJsonString());
 
     return network;
   }

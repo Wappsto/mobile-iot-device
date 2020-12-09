@@ -44,11 +44,19 @@ class SecureSocketChannel extends StreamChannelMixin {
     });
 
     _controller.local.stream.listen((data) {
-        _socket.add(utf8.encode(data));
+        try {
+          _socket.add(utf8.encode(data));
+        } catch(e) {
+          print(e);
+        }
     });
 
     _socket.handleError(() => print("Socket Error"));
 
     return true;
+  }
+
+  void close() {
+    _socket.close();
   }
 }

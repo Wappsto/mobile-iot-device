@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
-import 'package:mobile_iot_device/models/sensor.dart';
-import 'package:mobile_iot_device/models/device.dart';
-import 'package:mobile_iot_device/models/value.dart';
-import 'package:mobile_iot_device/models/state.dart';
+import 'package:slx_snitch/models/sensor.dart';
+import 'package:slx_snitch/models/device.dart';
+import 'package:slx_snitch/models/value.dart';
+import 'package:slx_snitch/models/state.dart';
 
 class CompassSensor extends Sensor {
-  Value _value;
-  Value _valueBearing;
   final List<String> _headings = [
     'N', 'NNE', 'NE', 'ENE',
     'E','ESE','SE', 'SSE',
@@ -18,24 +16,26 @@ class CompassSensor extends Sensor {
   CompassSensor() {
     icon = Icons.stars;
     name = "Compass Sensor";
+    valueName.add('Compass Sensor');
+    valueName.add('Compass');
   }
 
   void onData(double compassValue) async {
-    int value = compassValue.toInt();
+    int cv = compassValue.toInt();
     String dir = "";
 
     dir = _headings[(compassValue + 11.25) ~/ 22.5];
 
-    if(_value != null) {
-      _value.update(value.toString());
+    if(value[0] != null) {
+      value[0].update(cv.toString());
     }
 
-    if(_valueBearing != null) {
-      _valueBearing.update(dir);
+    if(value[1] != null) {
+      value[1].update(dir);
     }
 
-    print("Compass value : $dir ($value)");
-    text = "$dir ($value °)";
+    print("Compass value : $dir ($cv)");
+    text = "$dir ($cv °)";
     call();
   }
 
@@ -49,20 +49,16 @@ class CompassSensor extends Sensor {
     }
   }
 
-  void linkValue(Device device) {
-    _value = device.findValue(name: 'Compass Sensor');
-    if(_value == null) {
-      _value = device.createNumberValue('Compass Sensor', 'angle', 0, 360, 1, '°');
-      _value.createState(StateType.Report, data: "0");
+  Value createValue(Device device, String name) {
+    Value v;
+    if(name == "Compass") {
+      v = device.createStringValue('Compass', 'bearing', 3);
+      v.createState(StateType.Report, data: "N");
+    } else {
+      v = device.createNumberValue('Compass Sensor', 'angle', 0, 360, 1, '°');
+      v.createState(StateType.Report, data: "0");
+      v.setDelta(5);
     }
-
-    _valueBearing = device.findValue(name: 'Compass');
-    if(_valueBearing == null) {
-      _valueBearing = device.createStringValue('Compass', 'bearing', 3);
-      _valueBearing.createState(StateType.Report, data: "N");
-    }
-
-    _value.setDelta(5);
+    return v;
   }
-
 }

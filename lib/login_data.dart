@@ -4,9 +4,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mobile_iot_device/dashboard.dart';
-import 'package:mobile_iot_device/rest.dart';
-import 'package:mobile_iot_device/utils/facebook_login_view.dart';
+import 'package:slx_snitch/screens/dashboard.dart';
+import 'package:slx_snitch/rest.dart';
+import 'package:slx_snitch/utils/facebook_login_view.dart';
 
 class LoginData extends ControllerMVC {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -34,8 +34,8 @@ class LoginData extends ControllerMVC {
   static bool get signInActive => _this._signInActive;
   static bool get resetActive => _this._resetActive;
 
-  static String get displayLogoTitle => "SLX Mobile IoT Device";
-  static String get displayLogoSubTitle => "Turn your mobile device into an IoT device";
+  static String get displayLogoTitle => "SLX Snitch";
+  static String get displayLogoSubTitle => "Use your phone as an IoT sensor device";
   static String get displaySignInMenuButton => "SIGN IN";
   static String get displaySignUpMenuButton => "SIGN UP";
   static String get displayResetMenuButton => "FORGOT";

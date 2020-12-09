@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mobile_iot_device/main.dart';
+import 'package:slx_snitch/main.dart';
 
 typedef InitCallback = void Function(SharedPreferences);
 

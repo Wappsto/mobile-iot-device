@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.wappsto.mobile_iot_device">
+          package="com.wappsto.slx_snitch">
   <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
@@ -14,7 +15,7 @@
        FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="SLX Mobile IoT Device"
+        android:label="SLX Snitch"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

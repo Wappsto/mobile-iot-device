@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
-import 'package:mobile_iot_device/models/device.dart';
-import 'package:mobile_iot_device/wappsto.dart';
+import 'package:slx_snitch/models/device.dart';
+import 'package:slx_snitch/wappsto.dart';
 
 class Network {
   final String id;
@@ -23,7 +23,9 @@ class Network {
       devices: devs,
     );
 
-    json['device'].forEach((dev) => devs.add(Device.fromJson(dev, network)));
+    if(json['device'] != null) {
+      json['device'].forEach((dev) => devs.add(Device.fromJson(dev, network)));
+    }
 
     return network;
   }

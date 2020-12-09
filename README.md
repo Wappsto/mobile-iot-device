@@ -1,6 +1,6 @@
-# SLX Mobile IoT Device 
+# SLX Snitch
 
-Converts a phone into a Mobile IoT Device. 
+Converts a phone into a Mobile IoT Device.
 
 ## Getting Started
 

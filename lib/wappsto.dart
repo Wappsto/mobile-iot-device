@@ -5,9 +5,10 @@ import 'dart:collection';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:basic_utils/basic_utils.dart';
 
-import 'package:mobile_iot_device/utils/SecureSocketChannel.dart';
-import 'package:mobile_iot_device/models/network.dart';
-import 'package:mobile_iot_device/models/state.dart';
+import 'package:slx_snitch/utils/SecureSocketChannel.dart';
+import 'package:slx_snitch/models/network.dart';
+import 'package:slx_snitch/models/value.dart';
+import 'package:slx_snitch/models/state.dart';
 
 void myIsolate(SendPort isolateToMainStream) {
   ReceivePort mainToIsolateStream = ReceivePort();
@@ -15,18 +16,25 @@ void myIsolate(SendPort isolateToMainStream) {
   Peer _rpc;
   bool ready = false;
   List<List<dynamic> > waitQueue;
+  SecureSocketChannel _socket;
 
   Future<dynamic> sendToRPC(List<dynamic> data) async {
     var res;
     try {
-      if(data[2] is String) {
-        res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': json.decode(data[2])});
+      if(data.length == 2) {
+        res = await _rpc.sendRequest(data[0], {'url': data[1]});
       } else {
-        res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': data[2]});
+        if(data[2] is String) {
+          res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': json.decode(data[2])});
+        } else {
+          res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': data[2]});
+        }
       }
-    } catch(e) {
+    } catch(e, backtrace) {
       print("ISO ERROR");
       print(e);
+      print(backtrace);
+      res = {'value':false};
     }
     return res;
   }
@@ -53,9 +61,9 @@ void myIsolate(SendPort isolateToMainStream) {
   mainToIsolateStream.listen((data) async {
       if(data is List) {
         if(data.length == 5) {
-          SecureSocketChannel socket = SecureSocketChannel(host: data[0], port: data[1], ca: data[2], cert: data[3], key: data[4]);
-          socket.connect().then((conn) {
-              _rpc = Peer(socket.cast<String>());
+          _socket = SecureSocketChannel(host: data[0], port: data[1], ca: data[2], cert: data[3], key: data[4]);
+          _socket.connect().then((conn) {
+              _rpc = Peer(_socket.cast<String>());
 
               _rpc.registerMethod('PUT', (Parameters params) {
                   // Uri url = params['url'].asUri;
@@ -84,6 +92,14 @@ void myIsolate(SendPort isolateToMainStream) {
           waitQueue.add(data);
           await handleQueue();
         }
+      } else {
+        if(data == "stop") {
+          if(_socket != null) {
+            print("Stopping isolate");
+            _socket.close();
+            mainToIsolateStream.close();
+          }
+        }
       }
   });
 }
@@ -97,6 +113,8 @@ class Wappsto {
 
   Network _network;
   SendPort mainToIsolateStream;
+  int _sendId = 0;
+  HashMap _callbacks = HashMap<int, Completer>();
 
   Wappsto({this.host = "wappsto.com", this.port = 443, this.ca, this.cert, this.key});
 
@@ -104,6 +122,12 @@ class Wappsto {
     mainToIsolateStream = await initIsolate();
 
     mainToIsolateStream.send([host, port, ca, cert, key]);
+  }
+
+  void stop() {
+    if(mainToIsolateStream != null) {
+      mainToIsolateStream.send("stop");
+    }
   }
 
   Network createNetwork(String name) {
@@ -127,8 +151,10 @@ class Wappsto {
     return await rawSend(cmd);
   }
 
-  int _sendId = 0;
-  HashMap _callbacks = HashMap<int, Completer>();
+  Future<bool> deleteValue(Value value) async {
+    List<String> cmd = ['DELETE', value.url];
+    return await rawSend(cmd);
+  }
 
   Future<bool> rawSend(List<String> cmd) async {
     if(mainToIsolateStream != null) {
