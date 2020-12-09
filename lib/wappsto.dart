@@ -19,24 +19,38 @@ void myIsolate(SendPort isolateToMainStream) {
   SecureSocketChannel _socket;
 
   Future<dynamic> sendToRPC(List<dynamic> data) async {
-    var res;
     try {
-      if(data.length == 2) {
-        res = await _rpc.sendRequest(data[0], {'url': data[1]});
-      } else {
+      var parm = {'url': data[1]};
+      if(data.length == 3) {
         if(data[2] is String) {
-          res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': json.decode(data[2])});
+          parm['data'] = json.decode(data[2]);
         } else {
-          res = await _rpc.sendRequest(data[0], {'url': data[1], 'data': data[2]});
+          parm['data'] = data[2];
         }
+        parm['meta'] = {
+          'fast': true
+        };
       }
+      return _rpc.sendRequest(data[0], parm);
     } catch(e, backtrace) {
       print("ISO ERROR");
       print(e);
       print(backtrace);
-      res = {'value':false};
+      return {'value':false};
     }
-    return res;
+  }
+
+  Future waitWhile(bool test(), [Duration pollInterval = Duration.zero]) {
+    var completer = new Completer();
+    check() {
+      if (!test()) {
+        completer.complete();
+      } else {
+        new Timer(pollInterval, check);
+      }
+    }
+    check();
+    return completer.future;
   }
 
   Future<void> handleQueue() async {
@@ -46,12 +60,25 @@ void myIsolate(SendPort isolateToMainStream) {
       while(waitQueue != null) {
         var tmp = waitQueue;
         waitQueue = null;
-        for(int i=0; i<tmp.length; i++) {
-          int id = tmp[i].removeLast();
-          var res = await sendToRPC(tmp[i]);
+        print("Queue size: ${tmp.length}");
+        while(tmp.length > 0) {
+          var items = tmp.take(10).toList();
+          tmp.removeRange(0, items.length);
+          int count = 0;
+          _rpc.withBatch(() {
+              for(int i=0; i<items.length; i++) {
+                int id = items[i].removeLast();
+                count++;
+                sendToRPC(items[i]).then((res) {
+                    List<dynamic> result = [id, res['value']];
+                    isolateToMainStream.send(result);
+                  count--;
+              });
+            }
+          });
 
-          List<dynamic> result = [id, res['value']];
-          isolateToMainStream.send(result);
+          await waitWhile(() => count > 0);
+          print("Done sending queue ${items.length} / ${tmp.length}");
         }
       }
       ready = true;
@@ -60,7 +87,25 @@ void myIsolate(SendPort isolateToMainStream) {
 
   mainToIsolateStream.listen((data) async {
       if(data is List) {
-        if(data.length == 5) {
+        if(data.length == 2) {
+          if(data[0] == "stop") {
+            int len = 0;
+
+            await waitWhile(() => !ready);
+
+            if(waitQueue != null) {
+              len = waitQueue.length;
+            }
+
+            isolateToMainStream.send([data[1], true]);
+
+            print("Stopping isolate - Ready ${ready} Q: ${len}");
+            if(_socket != null) {
+              _socket.close();
+            }
+            mainToIsolateStream.close();
+          }
+        } else if(data.length == 5) {
           _socket = SecureSocketChannel(host: data[0], port: data[1], ca: data[2], cert: data[3], key: data[4]);
           _socket.connect().then((conn) {
               _rpc = Peer(_socket.cast<String>());
@@ -92,14 +137,6 @@ void myIsolate(SendPort isolateToMainStream) {
           waitQueue.add(data);
           await handleQueue();
         }
-      } else {
-        if(data == "stop") {
-          if(_socket != null) {
-            print("Stopping isolate");
-            _socket.close();
-            mainToIsolateStream.close();
-          }
-        }
       }
   });
 }
@@ -114,7 +151,17 @@ class Wappsto {
   Network _network;
   SendPort mainToIsolateStream;
   int _sendId = 0;
+  int _recvCount = 0;
   HashMap _callbacks = HashMap<int, Completer>();
+  Function _progressCallback;
+
+  int get totalEvents {
+    return _sendId;
+  }
+
+  int get sendEvents {
+    return _recvCount;
+  }
 
   Wappsto({this.host = "wappsto.com", this.port = 443, this.ca, this.cert, this.key});
 
@@ -124,10 +171,8 @@ class Wappsto {
     mainToIsolateStream.send([host, port, ca, cert, key]);
   }
 
-  void stop() {
-    if(mainToIsolateStream != null) {
-      mainToIsolateStream.send("stop");
-    }
+  Future<void> stop() {
+    return rawSend(['stop']);
   }
 
   Network createNetwork(String name) {
@@ -167,10 +212,22 @@ class Wappsto {
 
       mainToIsolateStream.send(tmp);
 
+      updateProgress();
+
       return c.future;
     }
 
     return false;
+  }
+
+  void progressStatus(Function cb) {
+    _progressCallback = cb;
+  }
+
+  void updateProgress() {
+    if(_progressCallback != null) {
+      _progressCallback(_recvCount / _sendId);
+    }
   }
 
   Future<SendPort> initIsolate() async {
@@ -182,6 +239,8 @@ class Wappsto {
           SendPort mainToIsolateStream = data;
           completer.complete(mainToIsolateStream);
         } else {
+          _recvCount++;
+          updateProgress();
           if(_callbacks[data[0]] != null) {
             _callbacks[data[0]].complete(data[1]);
             _callbacks.remove(data[0]);

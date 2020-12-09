@@ -90,6 +90,7 @@ abstract class Sensor {
           if(create) {
             val = createValue(device, n);
           } else {
+            enable = false;
             print("Do not enable $n");
           }
         }

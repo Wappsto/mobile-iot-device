@@ -57,6 +57,8 @@ class SecureSocketChannel extends StreamChannelMixin {
   }
 
   void close() {
-    _socket.close();
+    if(_socket != null) {
+      _socket.close();
+    }
   }
 }

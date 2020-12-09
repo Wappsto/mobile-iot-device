@@ -1,13 +1,14 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:device_info/device_info.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:convert';
 
 import 'package:slx_snitch/rest.dart';
 import 'package:slx_snitch/wappsto.dart';
+import 'package:slx_snitch/utils/phone_info.dart';
 import 'package:slx_snitch/models/session.dart';
 import 'package:slx_snitch/models/sensor.dart';
+import 'package:slx_snitch/models/configuration.dart';
 import 'package:slx_snitch/models/network.dart';
 import 'package:slx_snitch/models/device.dart';
 import 'package:slx_snitch/models/creator.dart';
@@ -20,18 +21,20 @@ import 'package:slx_snitch/sensors/gyroscope.dart';
 //import 'package:slx_snitch/sensors/magnetometer.dart';
 import 'package:slx_snitch/sensors/compass.dart';
 import 'package:slx_snitch/sensors/battery.dart';
+import 'package:slx_snitch/sensors/phone_id.dart';
+import 'package:slx_snitch/sensors/run_time.dart';
+
 
 class Manager {
   String _host = "collector.wappsto.com";
   int _port = 443;
   SharedPreferences _prefs;
-  List<Sensor> _sensors = new List<Sensor>();
+  List<Sensor> _sensors = List<Sensor>();
+  List<Configuration> _configs = List<Configuration>();
   String networkID;
   Wappsto wappsto;
   Network network;
   var state;
-  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-  Map<String, dynamic> deviceData;
   bool _connected = false;
   String _ca;
   String _cert;
@@ -44,21 +47,25 @@ class Manager {
     _connected = false;
     _prefs = await SharedPreferences.getInstance();
 
-    _sensors.add(new NoiseSensor());
-    _sensors.add(new LightSensor());
-    _sensors.add(new LocationSensor());
-    _sensors.add(new WifiSensor());
-    _sensors.add(new AccelerometerSensor());
-    _sensors.add(new GyroscopeSensor());
+    _sensors.add(NoiseSensor());
+    _sensors.add(LightSensor());
+    _sensors.add(LocationSensor());
+    _sensors.add(WifiSensor());
+    _sensors.add(AccelerometerSensor());
+    _sensors.add(GyroscopeSensor());
     //_sensors.add(new MagnetometerSensor());
-    _sensors.add(new CompassSensor());
-    _sensors.add(new BatterySensor());
+    _sensors.add(CompassSensor());
+    _sensors.add(BatterySensor());
+
+    _configs.add(PhoneID());
+    _configs.add(RunTime());
 
     var p;
     if(networkID == null) {
       p = _prefs;
     }
     _sensors.forEach((s) => s.setup(update, p));
+    _configs.forEach((c) => c.setup(update, p));
 
     final String session = _prefs.getString("session");
 
@@ -93,12 +100,11 @@ class Manager {
       _key = creator.privateKey;
     }
 
-    initPlatformState();
-
     wappsto = new Wappsto(host: _host, port: _port, ca: _ca, cert: _cert, key: _key);
 
     if(networkID != null) {
       network = await RestAPI.fetchFullNetwork(session, networkID, wappsto);
+      linkValues(network.devices[0], false);
     }
 
     return true;
@@ -110,6 +116,10 @@ class Manager {
 
   List<Sensor> get sensors {
     return _sensors;
+  }
+
+  List<Configuration> get configurations {
+    return _configs;
   }
 
   Future<bool> start() async {
@@ -124,16 +134,17 @@ class Manager {
 
     _connected = true;
     _sensors.forEach((s) => s.run());
+    _configs.forEach((c) => c.run());
 
     return true;
   }
 
-  void stop() async {
+  Future<void> stop() async {
     print("Stopping");
     _connected = false;
     _sensors.forEach((s) => s.stop());
     if(wappsto != null) {
-      wappsto.stop();
+      await wappsto.stop();
     }
   }
 
@@ -176,11 +187,7 @@ class Manager {
         if(network != null) {
           print(network.toJsonString());
         }
-
-        //print(e.data);
       }
-    } else {
-      linkValues(network.devices[0], false);
     }
 
     return true;
@@ -188,6 +195,7 @@ class Manager {
 
   void linkValues(Device device, bool create) {
     _sensors.forEach((s) => s.linkValue(device, create));
+    _configs.forEach((c) => c.linkValue(device, create));
   }
 
   Future<List<String> > loadCerts() async {
@@ -250,6 +258,8 @@ class Manager {
       device = network.findDevice(name: deviceName);
     }
 
+    Map<String, dynamic> deviceData = await PhoneInfo.getPlatformState();
+
     if (Platform.isAndroid) {
       device.manufacturer = deviceData['manufacturer'];
       device.product = deviceData['model'];
@@ -271,66 +281,4 @@ class Manager {
     return network;
   }
 
-  Future<void> initPlatformState() async {
-    try {
-      if (Platform.isAndroid) {
-        deviceData = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
-      } else if (Platform.isIOS) {
-        deviceData = _readIosDeviceInfo(await deviceInfoPlugin.iosInfo);
-      }
-    } on PlatformException {
-      deviceData = <String, dynamic>{
-        'Error:': 'Failed to get platform version.'
-      };
-    }
-  }
-
-  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
-    return <String, dynamic>{
-      'version.securityPatch': build.version.securityPatch,
-      'version.sdkInt': build.version.sdkInt,
-      'version.release': build.version.release,
-      'version.previewSdkInt': build.version.previewSdkInt,
-      'version.incremental': build.version.incremental,
-      'version.codename': build.version.codename,
-      'version.baseOS': build.version.baseOS,
-      'board': build.board,
-      'bootloader': build.bootloader,
-      'brand': build.brand,
-      'device': build.device,
-      'display': build.display,
-      'fingerprint': build.fingerprint,
-      'hardware': build.hardware,
-      'host': build.host,
-      'id': build.id,
-      'manufacturer': build.manufacturer,
-      'model': build.model,
-      'product': build.product,
-      'supported32BitAbis': build.supported32BitAbis,
-      'supported64BitAbis': build.supported64BitAbis,
-      'supportedAbis': build.supportedAbis,
-      'tags': build.tags,
-      'type': build.type,
-      'isPhysicalDevice': build.isPhysicalDevice,
-      'androidId': build.androidId,
-      'systemFeatures': build.systemFeatures,
-    };
-  }
-
-  Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
-    return <String, dynamic>{
-      'name': data.name,
-      'systemName': data.systemName,
-      'systemVersion': data.systemVersion,
-      'model': data.model,
-      'localizedModel': data.localizedModel,
-      'identifierForVendor': data.identifierForVendor,
-      'isPhysicalDevice': data.isPhysicalDevice,
-      'utsname.sysname:': data.utsname.sysname,
-      'utsname.nodename:': data.utsname.nodename,
-      'utsname.release:': data.utsname.release,
-      'utsname.version:': data.utsname.version,
-      'utsname.machine:': data.utsname.machine,
-    };
-  }
 }
