@@ -6,6 +6,7 @@ import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:basic_utils/basic_utils.dart';
 
 import 'package:slx_snitch/utils/SecureSocketChannel.dart';
+import 'package:slx_snitch/models/wappsto_model.dart';
 import 'package:slx_snitch/models/network.dart';
 import 'package:slx_snitch/models/value.dart';
 import 'package:slx_snitch/models/state.dart';
@@ -60,7 +61,6 @@ void myIsolate(SendPort isolateToMainStream) {
       while(waitQueue != null) {
         var tmp = waitQueue;
         waitQueue = null;
-        print("Queue size: ${tmp.length}");
         while(tmp.length > 0) {
           var items = tmp.take(10).toList();
           tmp.removeRange(0, items.length);
@@ -78,7 +78,6 @@ void myIsolate(SendPort isolateToMainStream) {
           });
 
           await waitWhile(() => count > 0);
-          print("Done sending queue ${items.length} / ${tmp.length}");
         }
       }
       ready = true;
@@ -89,17 +88,11 @@ void myIsolate(SendPort isolateToMainStream) {
       if(data is List) {
         if(data.length == 2) {
           if(data[0] == "stop") {
-            int len = 0;
-
             await waitWhile(() => !ready);
-
-            if(waitQueue != null) {
-              len = waitQueue.length;
-            }
 
             isolateToMainStream.send([data[1], true]);
 
-            print("Stopping isolate - Ready ${ready} Q: ${len}");
+            print("Stopping isolate");
             if(_socket != null) {
               _socket.close();
             }
@@ -191,13 +184,13 @@ class Wappsto {
     return await rawSend(cmd);
   }
 
-  Future<bool> updateState(State state) async {
-    List<String> cmd = ['PUT', state.url, state.toJsonString()];
+  Future<bool> update(WappstoModel item) async {
+    List<String> cmd = ['PUT', item.url, item.toJsonString()];
     return await rawSend(cmd);
   }
 
-  Future<bool> deleteValue(Value value) async {
-    List<String> cmd = ['DELETE', value.url];
+  Future<bool> delete(WappstoModel item) async {
+    List<String> cmd = ['DELETE', item.url];
     return await rawSend(cmd);
   }
 

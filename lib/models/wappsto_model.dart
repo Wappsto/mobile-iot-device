@@ -14,8 +14,14 @@ abstract class WappstoModel {
     return parent.wappsto;
   }
 
+  Future<bool> save() async {
+    return wappsto.update(this);
+  }
+
+  Future<bool> delete() async {
+    return wappsto.delete(this);
+  }
+
   Map<String, dynamic> toJson({bool children = true});
-  Future<bool> save();
-  Future<bool> delete();
   String get url;
 }

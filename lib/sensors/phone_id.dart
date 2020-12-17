@@ -12,7 +12,7 @@ class PhoneID extends Configuration {
     icon = Icons.phonelink_setup;
     name = "Phone ID";
 
-    valueName.add('Phone ID');
+    addValue('Phone ID');
 
     PhoneInfo.getPlatformState().then((deviceData) {
         phoneId = deviceData['phone_id'];
@@ -20,9 +20,7 @@ class PhoneID extends Configuration {
   }
 
   void start() {
-    if(value[0] != null) {
-      value[0].update(phoneId);
-    }
+    update(0, phoneId);
 
     text = phoneId;
     call();

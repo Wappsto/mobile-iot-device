@@ -13,27 +13,19 @@ class BatterySensor extends Sensor {
   BatterySensor() {
     icon = Icons.battery_charging_full;
     name = "Battery Sensor";
-    valueName.add('Battery');
+
+    addConfiguration('Battery', ['Battery']);
   }
 
   void onData(IosBatteryInfo info) async {
-    print("Battery value: ${info.batteryLevel}");
-
-    if(value[0] != null) {
-      value[0].update(info.batteryLevel.toString());
+    if(update(0, info.batteryLevel)) {
+      text = "${info.batteryLevel} %";
+      call();
     }
-
-    text = "${info.batteryLevel} %";
-    call();
   }
 
   void start() {
-    try {
-      subscription = _battery.iosBatteryInfoStream.listen(onData);
-    }
-    catch (exception) {
-      print(exception);
-    }
+    subscription = _battery.iosBatteryInfoStream.listen(onData);
   }
 
   Value createValue(Device device, String name) {

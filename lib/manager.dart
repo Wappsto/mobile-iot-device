@@ -1,5 +1,4 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:convert';
 
@@ -64,8 +63,8 @@ class Manager {
     if(networkID == null) {
       p = _prefs;
     }
-    _sensors.forEach((s) => s.setup(update, p));
-    _configs.forEach((c) => c.setup(update, p));
+    _sensors.forEach((s) => s.setup(this, update, p));
+    _configs.forEach((c) => c.setup(this, update, p));
 
     final String session = _prefs.getString("session");
 
@@ -105,6 +104,8 @@ class Manager {
     if(networkID != null) {
       network = await RestAPI.fetchFullNetwork(session, networkID, wappsto);
       linkValues(network.devices[0], false);
+    } else {
+      await generateNetwork();
     }
 
     return true;
@@ -174,8 +175,6 @@ class Manager {
     final String session = _prefs.getString("session");
 
     if(networkID == null) {
-      network = await generateNetwork();
-
       try {
         await wappsto.postNetwork(network);
         await RestAPI.claimNetwork(session, network.id);
@@ -196,6 +195,21 @@ class Manager {
   void linkValues(Device device, bool create) {
     _sensors.forEach((s) => s.linkValue(device, create));
     _configs.forEach((c) => c.linkValue(device, create));
+  }
+
+  Sensor findSensor(String name) {
+    try {
+      return _sensors.firstWhere((sen) => sen.name == name);
+    } catch (e) {
+      print("Failed to find $name");
+      return null;
+    }
+  }
+
+  void saveNetwork() {
+    if(_prefs != null) {
+      _prefs.setString("network", network.toJsonString());
+    }
   }
 
   Future<List<String> > loadCerts() async {
@@ -236,9 +250,8 @@ class Manager {
     return [_prefs.getString("ca"), _prefs.getString("certificate"), _prefs.getString("private_key")];
   }
 
-  Future<Network> generateNetwork() async {
+  Future<void> generateNetwork() async {
     String rn = _prefs.getString("network") ?? "";
-    Network network;
     Device device;
     String networkName;
     String deviceName;
@@ -276,9 +289,7 @@ class Manager {
 
     linkValues(device, true);
 
-    _prefs.setString("network", network.toJsonString());
-
-    return network;
+    saveNetwork();
   }
 
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'dart:async';
 
 import 'package:slx_snitch/manager.dart';
@@ -40,7 +41,7 @@ class _SensorScreenState extends State<SensorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SLX Pocket'),
+        title: Text('Pocket IoT'),
         leading: new IconButton(
           icon: new Icon(Icons.arrow_back),
           onPressed: () {
@@ -68,28 +69,17 @@ class _SensorScreenState extends State<SensorScreen> {
     );
   }
 
-  ListTile _tile(Sensor sen) => ListTile(
-    leading: Icon(
-      sen.icon,
-    ),
-    title: Text(
-      sen.toString(),
-      style: TextStyle(
-        fontWeight: FontWeight.w500,
-        fontSize: 20,
-      )
-    ),
-    subtitle: Text(
-      sen.name
-    ),
-    trailing: Icon(Icons.keyboard_arrow_right),
-
-    selected: sen.enabled,
-    selectedTileColor: Colors.blue[100],
-    onTap: () {
-      setState(() {
-          sen.toggleEnabled();
-      });
-    },
-  );
+  Widget _tile(Sensor sen) {
+    return SimpleSettingsTile(
+      leading: Icon(
+        sen.icon,
+      ),
+      title: sen.toString(),
+      subtitle: sen.name,
+      child: SettingsScreen(
+        title: 'Configure ${sen.name}',
+        children: sen.getConfiguration(),
+      ),
+    );
+  }
 }

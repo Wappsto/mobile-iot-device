@@ -10,11 +10,11 @@ class RunTime extends Configuration {
     name = "Run Time";
     current = "60";
 
-    valueName.add('Run Time');
+    addValue('Run Time');
   }
 
   void start() {
-    text = "Run time: ${current}";
+    text = "Run time: $current";
     call();
   }
 

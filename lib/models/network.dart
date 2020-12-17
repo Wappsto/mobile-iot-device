@@ -1,15 +1,15 @@
 import 'package:uuid/uuid.dart';
-import 'dart:convert';
+import 'package:slx_snitch/models/wappsto_model.dart';
 import 'package:slx_snitch/models/device.dart';
 import 'package:slx_snitch/wappsto.dart';
 
-class Network {
+class Network extends WappstoModel {
   final String id;
   final String name;
   Wappsto _wappsto;
   List<Device> devices;
 
-  Network({this.id, this.name, Wappsto wappsto, this.devices}) {
+  Network({this.id, this.name, Wappsto wappsto, this.devices}) : super(null) {
     _wappsto = wappsto;
   }
 
@@ -30,23 +30,22 @@ class Network {
     return network;
   }
 
-  Map<String, dynamic> toJson() {
-    List<Map<String, dynamic> > devs = new List<Map<String, dynamic> >();
-    devices.forEach((dev) => devs.add(dev.toJson()));
-
-    return {
+  Map<String, dynamic> toJson({bool children = true}) {
+    var network = {
       'meta': {
         'id': id,
         'version': '2.0',
         'type': 'network',
       },
       'name': name,
-      'device': devs,
     };
-  }
 
-  String toJsonString() {
-    return jsonEncode(toJson());
+    if(children) {
+      List<Map<String, dynamic> > devs = new List<Map<String, dynamic> >();
+      devices.forEach((dev) => devs.add(dev.toJson()));
+      network['device'] = devs;
+    }
+    return network;
   }
 
   Device createDevice(String name, {String version, String product, String manufacturer}) {

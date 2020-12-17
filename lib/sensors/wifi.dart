@@ -9,7 +9,8 @@ class WifiSensor extends Sensor {
   WifiSensor() {
     icon = Icons.wifi;
     name = "WiFi Sensor";
-    valueName.add('WiFi');
+
+    addConfiguration('WiFi', ['WiFi']);
   }
 
   void onData(ConnectivityResult result) async {
@@ -20,12 +21,10 @@ class WifiSensor extends Sensor {
       data = await Connectivity().getWifiName();
     }
 
-    if(value[0] != null) {
-      value[0].update(data);
+    if(update(0, data)) {
+      text = "$data";
+      call();
     }
-
-    text = "$data";
-    call();
   }
 
   void start() {

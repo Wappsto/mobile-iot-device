@@ -2,17 +2,17 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:mobile_iot_device/wappsto.dart';
-import 'package:mobile_iot_device/rest.dart';
-import 'package:mobile_iot_device/models/network.dart';
+import 'package:slx_snitch/wappsto.dart';
+import 'package:slx_snitch/rest.dart';
+import 'package:slx_snitch/models/network.dart';
 
 
 void main() async {
   var loadFromServer = !await File('ca.pem').exists();
 
   if(loadFromServer) {
-    final session = await fetchSession('', '');
-    final creators = await fetchCreator(session);
+    final session = await RestAPI.fetchSession('', '');
+    final creators = await RestAPI.fetchCreator(session);
 
     creators.forEach(print);
 

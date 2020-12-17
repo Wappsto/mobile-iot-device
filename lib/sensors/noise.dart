@@ -14,8 +14,8 @@ class NoiseSensor extends Sensor {
   NoiseSensor() {
     icon = Icons.mic;
     name = "Noise Sensor";
-    valueName.add('Noise');
-    valueName.add('Sound');
+    addConfiguration('Noise', ['Noise']);
+    addConfiguration('Sound', ['Sound']);
   }
 
   String dbToText(double db) {
@@ -42,16 +42,12 @@ class NoiseSensor extends Sensor {
       _noiseMax = max;
 
       if(noiseReading.meanDecibel.isFinite) {
-        if(value[1] != null) {
-          if(value[1].update(noiseReading.meanDecibel.toInt().toString())) {
-            if(value[0] != null) {
-              value[0].update(mean);
-            }
-          }
-        }
+        if(update(1, noiseReading.meanDecibel.toInt())) {
+          update(0, mean);
 
-        text = "$mean (${noiseReading.meanDecibel.toInt().toString()} db)";
-        call();
+          text = "$mean (${noiseReading.meanDecibel.toInt().toString()} db)";
+          call();
+        }
       } else {
         print("Invalid value from MIC");
       }
@@ -59,11 +55,7 @@ class NoiseSensor extends Sensor {
   }
 
   void start() async {
-    try {
-      subscription = _noiseMeter.noiseStream.listen(onData);
-    } catch (err) {
-      print(err);
-    }
+    subscription = _noiseMeter.noiseStream.listen(onData);
   }
 
   Value createValue(Device device, String name) {

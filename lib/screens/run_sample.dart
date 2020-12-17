@@ -128,14 +128,14 @@ class _RunScreenState extends State<RunScreen> {
           ),
         ),
         Text(
-          "Run measurement for ${_duration} seconds",
+          "Run measurement for $_duration seconds",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold
           ),
         ),
         Text(
-          "and measure ${_values} values",
+          "and measure $_values values",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold
@@ -225,7 +225,7 @@ class _RunScreenState extends State<RunScreen> {
         setState(() {
             _children = List<Widget>();
             _children.add(Text(
-                "${_total} measurements captured in ${_duration} seconds",
+                "$_total measurements captured in $_duration seconds",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.bold),
             ));
@@ -248,7 +248,7 @@ class _RunScreenState extends State<RunScreen> {
           )
         ),
         Text(
-          "${_send} / ${_total} measurements",
+          "$_send / $_total measurements",
           textAlign: TextAlign.center,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
@@ -265,11 +265,15 @@ class _RunScreenState extends State<RunScreen> {
 
     _manager.wappsto.progressStatus((double p) {
         if(mounted) {
-          setState(() {
+          try {
+            setState(() {
               _progress = p;
               _send = _manager.wappsto.sendEvents;
               _total = _manager.wappsto.totalEvents;
-          });
+            });
+          } catch (e) {
+            print(e);
+          }
         }
     });
 

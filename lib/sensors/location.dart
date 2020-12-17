@@ -12,8 +12,11 @@ class LocationSensor extends Sensor {
   LocationSensor() {
     icon = Icons.my_location;
     name = "Location";
-    valueName.add('Latitude');
-    valueName.add('Longitude');
+
+    addConfiguration(name, [
+        'Latitude',
+        'Longitude'
+    ]);
   }
 
   void onData(Position position) {
@@ -26,12 +29,8 @@ class LocationSensor extends Sensor {
       _lastLat = position.latitude;
       _lastLong = position.longitude;
 
-      if(value[0] != null) {
-        value[0].update(position.latitude.toString());
-      }
-      if(value[1] != null) {
-        value[1].update(position.longitude.toString());
-      }
+      update(0, position.latitude);
+      update(1, position.longitude);
     }
 
     text = "${position.latitude}, ${position.longitude}";
@@ -54,10 +53,10 @@ class LocationSensor extends Sensor {
     Value value;
     if(name == 'Latitude') {
       value = device.createNumberValue('Latitude', 'latitude', -90, 90, 0.000001, '°N');
-      value.createState(StateType.Report, data: "0");
+      value.createState(StateType.Report, data: "NA");
     } else {
       value = device.createNumberValue('Longitude', 'longitude', -180, 180, 0.000001, '°E');
-      value.createState(StateType.Report, data: "0");
+      value.createState(StateType.Report, data: "NA");
     }
     return value;
   }

@@ -1,9 +1,9 @@
 import 'package:uuid/uuid.dart';
+import 'package:slx_snitch/models/wappsto_model.dart';
 import 'package:slx_snitch/models/network.dart';
 import 'package:slx_snitch/models/value.dart';
-import 'package:slx_snitch/wappsto.dart';
 
-class Device {
+class Device extends WappstoModel {
   final String id;
   final String name;
   String manufacturer;
@@ -14,12 +14,9 @@ class Device {
   String protocol;
   String communication;
 
-  Network parent;
-  List<Value> values;
+  List<Value> values = List<Value>();
 
-  Device({this.id, this.name, this.values, this.parent}) {
-    values = new List<Value>();
-  }
+  Device({this.id, this.name, this.values, Network parent}) : super(parent);
 
   factory Device.fromJson(Map<String, dynamic> json, Network parent) {
     List<Value> vals = new List<Value>();
@@ -64,10 +61,7 @@ class Device {
     return device;
   }
 
-  Map<String, dynamic> toJson() {
-    List<Map<String, dynamic> > vals = new List<Map<String, dynamic> >();
-    values.forEach((val) => vals.add(val.toJson()));
-
+  Map<String, dynamic> toJson({bool children = true}) {
     var device = {
       'meta': {
         'id': id,
@@ -75,8 +69,13 @@ class Device {
         'type': 'device',
       },
       'name': name,
-      'value': vals,
     };
+
+    if(children) {
+      List<Map<String, dynamic> > vals = new List<Map<String, dynamic> >();
+      values.forEach((val) => vals.add(val.toJson()));
+      device['value'] = vals;
+    }
 
     if(manufacturer != null) {
       device['manufacturer'] = manufacturer;
@@ -119,7 +118,7 @@ class Device {
     return value;
   }
 
-  Value createNumberValue(String name, String type, int min, int max, double step, String unit) {
+  Value createNumberValue(String name, String type, double min, double max, double step, String unit) {
     Value value = _createValue(name, type);
 
     value.createNumber(min, max, step, unit);
@@ -151,7 +150,7 @@ class Device {
         List<Value> wrongs = vals.skip(1).toList();
         wrongs.forEach((val) {
             values.remove(val);
-            print("Deleting ${val}");
+            print("Deleting $val");
             val.delete();
         });
         return vals[0];
@@ -159,10 +158,6 @@ class Device {
     }
 
     return values[0];
-  }
-
-  Wappsto get wappsto {
-    return parent.wappsto;
   }
 
   String get url {

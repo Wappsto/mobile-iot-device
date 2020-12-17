@@ -57,6 +57,8 @@ dependencies:
   #qrscan: ^0.2.21
   circular_countdown_timer: ^0.0.8
   barcode_scan: ^3.0.1
+  flutter_spinbox: ^0.2.3
+  flutter_settings_screens: ^0.2.1
 
 dev_dependencies:
   flutter_test:

@@ -9,32 +9,27 @@ class GyroscopeSensor extends Sensor {
   GyroscopeSensor() {
     icon = Icons.all_out;
     name = "Gyroscope";
-    valueName.add('Gyroscope X');
-    valueName.add('Gyroscope Y');
-    valueName.add('Gyroscope Z');
+    addConfiguration(name, [
+        'Gyroscope X',
+        'Gyroscope Y',
+        'Gyroscope Z',
+    ]);
   }
 
   void onData(GyroscopeEvent event) async {
-    if(value[0] != null) {
-      value[0].update(event.x.toInt().toString());
-    }
-    if(value[1] != null) {
-      value[1].update(event.y.toInt().toString());
-    }
-    if(value[2] != null) {
-      value[2].update(event.z.toInt().toString());
-    }
+    bool send = false;
+    send |= update(0, event.x);
+    send |= update(1, event.y);
+    send |= update(2, event.z);
 
-    text = "X: ${event.x.toInt()} Y: ${event.y.toInt()} Z: ${event.z.toInt()}";
-    call();
+    if(send) {
+      text = "X: ${event.x.toInt()} Y: ${event.y.toInt()} Z: ${event.z.toInt()}";
+      call();
+    }
   }
 
   void start() {
-    try {
-      subscription = gyroscopeEvents.listen(onData);
-    } catch (exception) {
-      print(exception);
-    }
+    subscription = gyroscopeEvents.listen(onData);
   }
 
   Value createValue(Device device, String name) {

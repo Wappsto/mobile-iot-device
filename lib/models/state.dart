@@ -1,20 +1,19 @@
 import 'package:slx_snitch/models/value.dart';
-import 'dart:convert';
+import 'package:slx_snitch/models/wappsto_model.dart';
 
 enum StateType {
   Report,
   Control
 }
 
-class State {
+class State extends WappstoModel {
   final String id;
   final StateType type;
   String _type;
   String data;
   String timestamp;
-  Value parent;
 
-  State({this.id, this.type, this.timestamp, this.data, this.parent}) {
+  State({this.id, this.type, this.timestamp, this.data, Value parent}) : super(parent) {
     _type = type == StateType.Report ? "Report" : "Control";
     if(timestamp == null) {
       timestamp = new DateTime.now().toUtc().toIso8601String();
@@ -36,7 +35,7 @@ class State {
     timestamp = DateTime.now().toUtc().toIso8601String();
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool children = true}) {
     return {
       'meta': {
         'id': id,
@@ -47,10 +46,6 @@ class State {
       'timestamp': timestamp,
       'data': data,
     };
-  }
-
-  String toJsonString() {
-    return jsonEncode(toJson());
   }
 
   String get url {

@@ -6,34 +6,26 @@ import 'package:slx_snitch/models/value.dart';
 import 'package:slx_snitch/models/state.dart';
 
 class LightSensor extends Sensor {
-  Light _light;
+  Light _light = Light();
 
   LightSensor() {
     icon = Icons.wb_sunny;
     name = "Light Sensor";
 
-    valueName.add('Light');
+    addConfiguration('Light', [
+        'Light'
+    ]);
   }
 
   void onData(int luxValue) async {
-    print("Lux value from Light Sensor: $luxValue");
-
-    if(value[0] != null) {
-      value[0].update(luxValue.toString());
+    if(update(0, luxValue)) {
+      text = "$luxValue lux";
+      call();
     }
-
-    text = "$luxValue lux";
-    call();
   }
 
   void start() {
-    _light = new Light();
-    try {
-      subscription = _light.lightSensorStream.listen(onData);
-    }
-    on LightException catch (exception) {
-      print(exception);
-    }
+    subscription = _light.lightSensorStream.listen(onData);
   }
 
   Value createValue(Device device, String name) {

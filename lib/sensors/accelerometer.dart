@@ -6,35 +6,55 @@ import 'package:slx_snitch/models/value.dart';
 import 'package:slx_snitch/models/state.dart';
 
 class AccelerometerSensor extends Sensor {
+  int last = 0;
+  int diff = 0;
+  int min = 0;
+  int max = 0;
+
   AccelerometerSensor() {
     icon = Icons.all_out;
     name = "Accelerometer";
-    valueName.add('Accelerometer X');
-    valueName.add('Accelerometer Y');
-    valueName.add('Accelerometer Z');
+
+    addConfiguration(name, [
+        'Accelerometer X',
+        'Accelerometer Y',
+        'Accelerometer Z'
+      ]
+    );
   }
 
   void onData(AccelerometerEvent event) async {
-    if(value[0] != null) {
-      value[0].update(event.x.toString());
-    }
-    if(value[1] != null) {
-      value[1].update(event.y.toString());
-    }
-    if(value[2] != null) {
-      value[2].update(event.z.toString());
-    }
+    DateTime now = DateTime.now();
 
-    text = "X: ${event.x.toInt()} Y: ${event.y.toInt()} Z: ${event.z.toInt()}";
-    call();
+    int ticks = now.microsecondsSinceEpoch;
+    if(last != 0) {
+      diff = ticks - last;
+      if(min == 0) {
+        min = diff;
+      } else if(diff < min) {
+        min = diff;
+      }
+      if(max < diff) {
+        max = diff;
+      }
+    }
+    last = ticks;
+
+    bool send = false;
+    send |= update(0, event.x);
+    send |= update(1, event.y);
+    send |= update(2, event.z);
+
+    //print("Time diff: $diff Min $min Max $max");
+    if(send) {
+
+      text = "X: ${event.x.toInt()} Y: ${event.y.toInt()} Z: ${event.z.toInt()}";
+      call();
+    }
   }
 
   void start() {
-    try {
-      subscription = accelerometerEvents.listen(onData);
-    } catch (exception) {
-      print(exception);
-    }
+    subscription = accelerometerEvents.listen(onData);
   }
 
   Value createValue(Device device, String name) {

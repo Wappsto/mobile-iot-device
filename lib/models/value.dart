@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
+import 'package:slx_snitch/models/wappsto_model.dart';
 import 'package:slx_snitch/models/device.dart';
 import 'package:slx_snitch/models/state.dart';
-import 'package:slx_snitch/wappsto.dart';
 
 enum ValuePermission {
   ReadOnly,
@@ -9,29 +9,26 @@ enum ValuePermission {
   ReadWrite
 }
 
-class Value {
+class Value extends WappstoModel {
   final String id;
   final String name;
   String type;
   ValuePermission permission;
   String _permission;
-  int period;
+  double period;
   double delta;
 
   Map<String, dynamic> number;
   Map<String, dynamic> string;
 
-  Device parent;
-  List<State> states;
+  List<State> states = List<State>();
 
   DateTime lastUpdate;
 
-  Value({this.id, this.name, this.type, this.permission, String period, String delta, this.states, this.parent}) {
-    states = new List<State>();
-
+  Value({this.id, this.name, this.type, this.permission, String period, String delta, this.states, Device parent}) : super(parent) {
     if(period != null) {
       try {
-        this.period = int.parse(period);
+        this.period = double.parse(period);
       } catch(e) {
         print("Failed to parse period ($period) for $name");
       }
@@ -105,10 +102,7 @@ class Value {
     return value;
   }
 
-  Map<String, dynamic> toJson() {
-    List<Map<String, dynamic> > stas = new List<Map<String, dynamic> >();
-    states.forEach((state) => stas.add(state.toJson()));
-
+  Map<String, dynamic> toJson({bool children = true}) {
     var val = {
       'meta': {
         'id': id,
@@ -118,8 +112,13 @@ class Value {
       'name': name,
       'type': type,
       'permission': _permission,
-      'state': stas,
     };
+
+    if(children) {
+      List<Map<String, dynamic> > stas = new List<Map<String, dynamic> >();
+      states.forEach((state) => stas.add(state.toJson()));
+      val['state'] = stas;
+    }
 
     if(period != null) {
       val['period'] = period.toString();
@@ -138,7 +137,19 @@ class Value {
     return val;
   }
 
-  void createNumber(int min, int max, double step, String unit) {
+  void setType(String type) {
+    this.type = type;
+  }
+
+  void setDelta(double delta) {
+    this.delta = delta;
+  }
+
+  void setPeriod(double period) {
+    this.period = period;
+  }
+
+  void createNumber(double min, double max, double step, String unit) {
     number = {
       'min': min,
       'max': max,
@@ -180,7 +191,7 @@ class Value {
           deltaUpdate = true;
         }
       } catch(e) {
-        print("Failed to convert $newData or ${state.data} to int ($delta)");
+        print("Failed to convert $newData or ${state.data} to double ($delta)");
         print(e);
       }
 
@@ -197,7 +208,7 @@ class Value {
 
       if(deltaUpdate || periodUpdate) {
         print("Updating $name with $newData (${lastUpdate == null} $deltaUpdate $periodUpdate)");
-        wappsto.updateState(state);
+        state.save();
         lastUpdate = tmp;
         return true;
       }
@@ -208,28 +219,8 @@ class Value {
     return false;
   }
 
-  bool delete() {
-    wappsto.deleteValue(this);
-  }
-
-  Wappsto get wappsto {
-    return parent.wappsto;
-  }
-
   String get url {
     return "${parent.url}/value/$id";
-  }
-
-  void setType(String type) {
-    this.type = type;
-  }
-
-  void setDelta(double delta) {
-    this.delta = delta;
-  }
-
-  void setPeriod(int period) {
-    this.period = period;
   }
 
   String toString() {

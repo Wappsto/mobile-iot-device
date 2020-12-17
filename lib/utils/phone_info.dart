@@ -10,6 +10,9 @@ class PhoneInfo {
       } else if (Platform.isIOS) {
         return _readIosDeviceInfo(await DeviceInfoPlugin().iosInfo);
       }
+      return <String, dynamic>{
+        'Error:': 'Unknown platform.'
+      };
     } on PlatformException {
       return <String, dynamic>{
         'Error:': 'Failed to get platform information.'

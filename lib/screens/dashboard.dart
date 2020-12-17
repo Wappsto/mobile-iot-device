@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-//import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:barcode_scan/barcode_scan.dart';
 
 import 'package:slx_snitch/rest.dart';
@@ -53,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SLX Snitch'),
+        title: Text('SLX Snitch App'),
         elevation: .1,
         automaticallyImplyLeading: false,
         actions: <Widget>[
@@ -75,9 +74,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             makeDashboardItem("Scan QR code", Icons.qr_code_scanner, fun: _scan),
             makeDashboardItem("Select Device", Icons.format_list_bulleted, widget: ListDevicesScreen()),
             makeDashboardItem("New Device", Icons.add, widget: ConfigureDeviceScreen()),
-            makeDashboardItem("SLX Pocket", Icons.phone_android, widget: SensorScreen()),
+            makeDashboardItem("Pocket IoT", Icons.phone_android, widget: SensorScreen()),
           ],
         ),
+        // Text link to wappsto.com - View your data in wappsto.com
       ),
     );
   }
