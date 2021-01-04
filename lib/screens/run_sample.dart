@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 
 import 'package:slx_snitch/manager.dart';
+import 'package:slx_snitch/models/value.dart';
+import 'package:slx_snitch/screens/camera.dart';
 
 class RunScreen extends StatefulWidget {
   static const routeName = '/run';
@@ -16,6 +18,7 @@ class RunScreen extends StatefulWidget {
 
 class _RunScreenState extends State<RunScreen> {
   Manager _manager;
+  Value _cameraValue;
   List<Widget> _children;
   String _status = "Please wait...";
   CountDownController _controller = CountDownController();
@@ -54,6 +57,8 @@ class _RunScreenState extends State<RunScreen> {
             if(c.value[0] != null) {
               _duration = int.parse(c.value[0].states[0].data);
             }
+          } else if(c.name == 'Picture') {
+            _cameraValue = c.value[0];
           }
       });
       _manager.sensors.forEach((sen) {
@@ -68,6 +73,9 @@ class _RunScreenState extends State<RunScreen> {
           _children = List<Widget>();
           _children.add(getStartInfo());
           _children.add(getStartButton());
+          if(_cameraValue != null) {
+            _children.add(getTakePicture());
+          }
       });
     } else {
       updateStatus("Failed to load '${widget.networkID}' because '${_manager.error}'");
@@ -155,6 +163,24 @@ class _RunScreenState extends State<RunScreen> {
       color: Colors.green,
       textColor: Colors.white,
       child: Text("Start Mesurements".toUpperCase(),
+        style: TextStyle(fontSize: 14)
+      ),
+    );
+  }
+
+  RaisedButton getTakePicture() {
+    return RaisedButton(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18.0),
+        side: BorderSide(color: Colors.red)
+      ),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => CameraScreen(value: _cameraValue))
+      ),
+      color: Colors.green,
+      textColor: Colors.white,
+      child: Text("Take Picture".toUpperCase(),
         style: TextStyle(fontSize: 14)
       ),
     );
