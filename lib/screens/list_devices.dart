@@ -54,9 +54,19 @@ class _ListDevicesScreenState extends State<ListDevicesScreen> {
   }
 
   Widget _buildList() {
-    var children = List<Widget>();
+    List<Widget> children = List<Widget>();
 
-    _networks.forEach((n) => children.add(_tile(n)));
+    if(_networks.length == 0) {
+      return Text(
+        "Loading. Please wait...",
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 20,
+        )
+      );
+    } else {
+      _networks.forEach((n) => children.add(_tile(n)));
+    }
 
     setState(() => _children = children);
 
