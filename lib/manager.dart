@@ -22,6 +22,7 @@ import 'package:slx_snitch/sensors/compass.dart';
 import 'package:slx_snitch/sensors/battery.dart';
 import 'package:slx_snitch/sensors/phone_id.dart';
 import 'package:slx_snitch/sensors/run_time.dart';
+import 'package:slx_snitch/sensors/picture.dart';
 
 
 class Manager {
@@ -58,6 +59,7 @@ class Manager {
 
     _configs.add(PhoneID());
     _configs.add(RunTime());
+    _configs.add(Picture());
 
     var p;
     if(networkID == null) {
@@ -88,15 +90,23 @@ class Manager {
       }
       Session sen = Session(id: session);
       List<Creator> creators = await RestAPI.fetchCreator(sen);
-      Creator creator = creators.firstWhere((creator) => creator.network == networkID);
 
-      if(creator == null) {
+      try {
+        Creator creator = creators.firstWhere((creator) => creator.network == networkID);
+
+        if(creator == null) {
+          error = "Failed to get Creator for Network";
+          return false;
+        }
+
+        _ca = creator.ca;
+        _cert = creator.certificate;
+        _key = creator.privateKey;
+      } catch(e) {
+        print("Creator not found for $networkID");
+        error = "Failed to get Creator for Network";
         return false;
       }
-
-      _ca = creator.ca;
-      _cert = creator.certificate;
-      _key = creator.privateKey;
     }
 
     wappsto = new Wappsto(host: _host, port: _port, ca: _ca, cert: _cert, key: _key);
