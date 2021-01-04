@@ -8,6 +8,8 @@ import 'package:slx_snitch/models/network.dart';
 
 
 void main() async {
+  return;
+
   var loadFromServer = !await File('ca.pem').exists();
 
   if(loadFromServer) {
