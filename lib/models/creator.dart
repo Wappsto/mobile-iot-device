@@ -47,4 +47,23 @@ class Creator {
   String toString() {
     return "Creator $id - Product $product - Network $network $name";
   }
+
+  @override
+  bool operator ==(Object other) =>
+    identical(this, other) ||
+    other is Creator &&
+    runtimeType == other.runtimeType &&
+    id == other.id &&
+    network == other.network &&
+    name == other.name &&
+    ca == other.ca &&
+    certificate == other.certificate &&
+    privateKey == other.privateKey &&
+    product == other.product;
+
+  @override
+  int get hashCode => id.hashCode ^ network.hashCode ^
+  name.hashCode ^ ca.hashCode ^
+  certificate.hashCode ^ privateKey.hashCode ^
+  product.hashCode;
 }

@@ -14,4 +14,15 @@ class Session {
   String toString() {
     return "Session $id for $username";
   }
+
+  @override
+  bool operator ==(Object other) =>
+    identical(this, other) ||
+    other is Session &&
+    runtimeType == other.runtimeType &&
+    id == other.id &&
+    username == other.username;
+
+  @override
+  int get hashCode => id.hashCode ^ username.hashCode;
 }

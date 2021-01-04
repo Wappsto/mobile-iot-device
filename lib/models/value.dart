@@ -20,6 +20,7 @@ class Value extends WappstoModel {
 
   Map<String, dynamic> number;
   Map<String, dynamic> string;
+  Map<String, dynamic> blob;
 
   List<State> states = List<State>();
 
@@ -56,6 +57,10 @@ class Value extends WappstoModel {
       default: {
         _permission = "rw";
       }
+    }
+
+    if(states == null) {
+      states = List<State>();
     }
   }
 
@@ -97,6 +102,8 @@ class Value extends WappstoModel {
       value.number = json['number'];
     } else if(json['string'] != null) {
       value.string = json['string'];
+    } else if(json['blob'] != null) {
+      value.blob = json['blob'];
     }
 
     return value;
@@ -132,6 +139,8 @@ class Value extends WappstoModel {
       val['number'] = number;
     } else if(string != null) {
       val['string'] = string;
+    } else if(blob != null) {
+      val['blob'] = blob;
     }
 
     return val;
@@ -160,6 +169,12 @@ class Value extends WappstoModel {
 
   void createString(int max) {
     string = {
+      'max': max,
+    };
+  }
+
+  void createBlob(int max) {
+    blob = {
       'max': max,
     };
   }
@@ -207,7 +222,7 @@ class Value extends WappstoModel {
       state.update(newData);
 
       if(deltaUpdate || periodUpdate) {
-        print("Updating $name with $newData (${lastUpdate == null} $deltaUpdate $periodUpdate)");
+        print("Updating $name ($id) with $newData (${lastUpdate == null} $deltaUpdate $periodUpdate)");
         state.save();
         lastUpdate = tmp;
         return true;
@@ -228,6 +243,8 @@ class Value extends WappstoModel {
       return "Number Value '$name' ($id)";
     } else if(string != null) {
       return "String Value '$name' ($id)";
+    } else if(blob != null) {
+      return "Blob Value '$name' ($id)";
     }
 
     return "Unknown Value  '$name' ($id)";

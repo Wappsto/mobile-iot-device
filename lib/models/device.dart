@@ -16,10 +16,14 @@ class Device extends WappstoModel {
 
   List<Value> values = List<Value>();
 
-  Device({this.id, this.name, this.values, Network parent}) : super(parent);
+  Device({this.id, this.name, this.values, Network parent}) : super(parent) {
+    if(values == null) {
+      values = List<Value>();
+    }
+  }
 
   factory Device.fromJson(Map<String, dynamic> json, Network parent) {
-    List<Value> vals = new List<Value>();
+    List<Value> vals = List<Value>();
 
     Device device = Device(
       id: json['meta']['id'],
@@ -72,7 +76,7 @@ class Device extends WappstoModel {
     };
 
     if(children) {
-      List<Map<String, dynamic> > vals = new List<Map<String, dynamic> >();
+      List<Map<String, dynamic> > vals = List<Map<String, dynamic> >();
       values.forEach((val) => vals.add(val.toJson()));
       device['value'] = vals;
     }
@@ -110,7 +114,7 @@ class Device extends WappstoModel {
 
   Value _createValue(String name, String type) {
     var uuid = Uuid();
-    Value value = new Value(id: uuid.v4(), name: name, type: type);
+    Value value = Value(id: uuid.v4(), name: name, type: type);
     value.parent = this;
 
     values.add(value);
@@ -130,6 +134,14 @@ class Device extends WappstoModel {
     Value value = _createValue(name, type);
 
     value.createString(max);
+
+    return value;
+  }
+
+  Value createBlobValue(String name, String type, int max) {
+    Value value = _createValue(name, type);
+
+    value.createBlob(max);
 
     return value;
   }

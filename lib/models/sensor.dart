@@ -45,9 +45,10 @@ abstract class Sensor {
       try {
         start();
         return true;
-      } catch (exception) {
+      } catch (exception, backtrace) {
         print("Failed to start $name");
         print(exception);
+        print(backtrace);
       }
     }
 
@@ -81,7 +82,8 @@ abstract class Sensor {
   bool update(int index, var data) {
     bool res = false;
     value.forEach((val) {
-        if(val.name == _valueName[index]) {
+        if(val != null &&
+          val.name == _valueName[index]) {
           res = val.update(data.toString());
         }
     });
