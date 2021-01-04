@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:slx_snitch/rest.dart';
 import 'package:slx_snitch/manager.dart';
@@ -67,19 +68,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 2.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          padding: EdgeInsets.all(3.0),
-          children: <Widget>[
-            makeDashboardItem("Scan QR code", Icons.qr_code_scanner, fun: _scan),
-            makeDashboardItem("Select Device", Icons.format_list_bulleted, widget: ListDevicesScreen()),
-            makeDashboardItem("New Device", Icons.add, widget: ConfigureDeviceScreen()),
-            makeDashboardItem("Pocket IoT", Icons.phone_android, widget: SensorScreen()),
-          ],
+        child: Row(
+          children: [
+            GridView.count(
+              crossAxisCount: 2,
+              padding: EdgeInsets.all(3.0),
+              children: <Widget>[
+                makeDashboardItem("Scan QR code", Icons.qr_code_scanner, fun: _scan),
+                makeDashboardItem("Select Device", Icons.format_list_bulleted, widget: ListDevicesScreen()),
+                makeDashboardItem("New Device", Icons.add, widget: ConfigureDeviceScreen()),
+                makeDashboardItem("Pocket IoT", Icons.phone_android, widget: SensorScreen()),
+              ],
+            ),
+            new RaisedButton(
+              onPressed: _openWappsto,
+              child: new Text('View your data in wappsto.com'),
+            ),
+          ]
         ),
-        // Text link to wappsto.com - View your data in wappsto.com
       ),
     );
+  }
+
+  _openWappsto() async {
+    const url = 'https://wappsto.com';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   Future _scan() async {
