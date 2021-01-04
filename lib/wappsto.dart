@@ -8,8 +8,6 @@ import 'package:basic_utils/basic_utils.dart';
 import 'package:slx_snitch/utils/SecureSocketChannel.dart';
 import 'package:slx_snitch/models/wappsto_model.dart';
 import 'package:slx_snitch/models/network.dart';
-import 'package:slx_snitch/models/value.dart';
-import 'package:slx_snitch/models/state.dart';
 
 void myIsolate(SendPort isolateToMainStream) {
   ReceivePort mainToIsolateStream = ReceivePort();
