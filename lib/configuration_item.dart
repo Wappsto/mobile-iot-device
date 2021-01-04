@@ -30,6 +30,11 @@ class ConfigurationItem {
   }
 
   void addValue(Value value) {
+    if(value == null) {
+      print("Tried to add NULL value to configuration $name");
+      return;
+    }
+
     _names.forEach((name) {
       if(name == value.name) {
         _values.add(value);
