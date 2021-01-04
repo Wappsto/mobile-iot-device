@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
+import 'package:flutter/services.dart';
 
 import 'package:slx_snitch/splash.dart';
 import 'package:slx_snitch/screens/login.dart';
@@ -8,8 +9,12 @@ import 'package:slx_snitch/screens/dashboard.dart';
 import 'package:slx_snitch/utils/transition_route_observer.dart';
 import 'package:slx_snitch/utils/cache_provider.dart';
 
-void main() {
+void main() async {
   Settings.init(cacheProvider: WappstoCacheProvider());
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]); // To turn off landscape mode
 
   runApp(
     SplashApp(

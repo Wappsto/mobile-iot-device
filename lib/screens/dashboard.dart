@@ -66,11 +66,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 2.0),
-        child: Row(
-          children: [
-            GridView.count(
+      body: Column(
+        children: [
+          Flexible(
+            child: GridView.count(
               crossAxisCount: 2,
               padding: EdgeInsets.all(3.0),
               children: <Widget>[
@@ -80,12 +79,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 makeDashboardItem("Pocket IoT", Icons.phone_android, widget: SensorScreen()),
               ],
             ),
-            new RaisedButton(
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 2.0),
+            child: new RaisedButton(
               onPressed: _openWappsto,
               child: new Text('View your data in wappsto.com'),
             ),
-          ]
-        ),
+          ),
+        ]
       ),
     );
   }

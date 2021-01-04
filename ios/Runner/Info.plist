@@ -53,6 +53,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
     <key>NSCameraUsageDescription</key>
-    <string>Camera permission is required for QR scanning.</string>
+    <string>Camera permission is required for QR scanning and pictures.</string>
 </dict>
 </plist>
