@@ -16,6 +16,10 @@ class Network extends WappstoModel {
   factory Network.fromJson(Map<String, dynamic> json, Wappsto wappsto) {
     List<Device> devs = new List<Device>();
 
+    if(json['name'] == null) {
+      json['name'] = "";
+    }
+
     Network network = Network(
       id: json['meta']['id'],
       name: json['name'],
