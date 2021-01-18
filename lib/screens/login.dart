@@ -50,7 +50,7 @@ class LoginScreen extends StatelessWidget {
 
 class _LogInPageState extends StateMVC<LogInPage> {
   _LogInPageState() : super(LoginData());
-  String wappsto_env = "Production";
+  String wappstoEnv = "Production";
 
   Future<void> _showMyDialog() async {
     return showDialog<void>(
@@ -64,10 +64,10 @@ class _LogInPageState extends StateMVC<LogInPage> {
               content: SingleChildScrollView(
                 child: DropdownButton<String>(
                   hint:  Text("Wappsto ENV"),
-                  value: wappsto_env,
+                  value: wappstoEnv,
                   onChanged: (String Value) {
                     setState(() {
-                        wappsto_env = Value;
+                        wappstoEnv = Value;
                     });
                   },
                   items: [
@@ -90,7 +90,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 TextButton(
                   child: Text('Save'),
                   onPressed: () {
-                    LoginData.switchWappstoEnv(wappsto_env);
+                    LoginData.switchWappstoEnv(wappstoEnv);
                     Navigator.of(context).pop();
                   },
                 ),

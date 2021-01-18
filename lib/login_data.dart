@@ -58,7 +58,7 @@ class LoginData extends ControllerMVC {
 
   static void switchWappstoEnv(String env) {
     _this._prefs.then((SharedPreferences prefs) {
-        print("Switching Wappsto Env to: ${env}");
+        print("Switching Wappsto Env to: $env");
         switch(env) {
           case "Production":
           prefs.setString("env", "");
