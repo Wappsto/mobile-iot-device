@@ -36,9 +36,9 @@ class ConfigurationItem {
     }
 
     _names.forEach((name) {
-      if(name == value.name) {
-        _values.add(value);
-      }
+        if(name == value.name) {
+          _values.add(value);
+        }
     });
   }
 
@@ -112,25 +112,27 @@ class ConfigurationItem {
   List<Widget> getWidgets() {
     List<Widget> children = List<Widget>();
 
-    children.add(SwitchSettingsTile(
-        settingKey: '$name|enable',
-        title: 'Enable $name',
-        enabledLabel: 'Enabled',
-        disabledLabel: 'Disabled',
-        defaultValue: enabled,
-        leading: Icon(sensor.icon),
-        childrenIfEnabled: _getSingleValueWidgets(sensor, _values[0]),
-        onChange: (value) {
-          if(value != enabled) {
-            enabled = value;
-            if(_prefs != null) {
-              _prefs.setBool("${name}_enabled", value);
+    if(_values.length != 0) {
+      children.add(SwitchSettingsTile(
+          settingKey: '$name|enable',
+          title: 'Enable $name',
+          enabledLabel: 'Enabled',
+          disabledLabel: 'Disabled',
+          defaultValue: enabled,
+          leading: Icon(sensor.icon),
+          childrenIfEnabled: _getSingleValueWidgets(sensor, _values[0]),
+          onChange: (value) {
+            if(value != enabled) {
+              enabled = value;
+              if(_prefs != null) {
+                _prefs.setBool("${name}_enabled", value);
+              }
+              sensor.updateEnabled();
+              sensor.save();
             }
-            sensor.updateEnabled();
-            sensor.save();
-          }
-        },
-    ));
+          },
+      ));
+    }
 
     return children;
   }
