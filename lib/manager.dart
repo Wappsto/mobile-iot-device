@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:slx_snitch/host.dart';
 import 'package:slx_snitch/rest.dart';
 import 'package:slx_snitch/wappsto.dart';
+import 'package:slx_snitch/setup.dart';
 import 'package:slx_snitch/utils/phone_info.dart';
 import 'package:slx_snitch/models/session.dart';
 import 'package:slx_snitch/models/sensor.dart';
@@ -12,26 +13,14 @@ import 'package:slx_snitch/models/configuration.dart';
 import 'package:slx_snitch/models/network.dart';
 import 'package:slx_snitch/models/device.dart';
 import 'package:slx_snitch/models/creator.dart';
-import 'package:slx_snitch/sensors/light.dart';
-import 'package:slx_snitch/sensors/noise.dart';
-import 'package:slx_snitch/sensors/location.dart';
-import 'package:slx_snitch/sensors/wifi.dart';
-import 'package:slx_snitch/sensors/accelerometer.dart';
-import 'package:slx_snitch/sensors/gyroscope.dart';
-//import 'package:slx_snitch/sensors/magnetometer.dart';
-import 'package:slx_snitch/sensors/compass.dart';
-import 'package:slx_snitch/sensors/battery.dart';
-import 'package:slx_snitch/sensors/phone_id.dart';
-import 'package:slx_snitch/sensors/run_time.dart';
-import 'package:slx_snitch/sensors/picture.dart';
 
 
 class Manager {
   String _host = "collector.$host";
   int _port = 443;
   SharedPreferences _prefs;
-  List<Sensor> _sensors = List<Sensor>();
-  List<Configuration> _configs = List<Configuration>();
+  List<Sensor> _sensors;
+  List<Configuration> _configs;
   String networkID;
   Wappsto wappsto;
   Network network;
@@ -47,20 +36,8 @@ class Manager {
   Future<bool> setup() async {
     _connected = false;
     _prefs = await SharedPreferences.getInstance();
-
-    _sensors.add(NoiseSensor());
-    _sensors.add(LightSensor());
-    _sensors.add(LocationSensor());
-    _sensors.add(WifiSensor());
-    _sensors.add(AccelerometerSensor());
-    _sensors.add(GyroscopeSensor());
-    //_sensors.add(new MagnetometerSensor());
-    _sensors.add(CompassSensor());
-    _sensors.add(BatterySensor());
-
-    _configs.add(PhoneID());
-    _configs.add(RunTime());
-    _configs.add(Picture());
+    _sensors = getSensors();
+    _configs = getConfigs();
 
     var p;
     if(networkID == null) {

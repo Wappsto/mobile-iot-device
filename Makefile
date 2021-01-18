@@ -1,5 +1,5 @@
-.PHONE: test
+.PHONY: test
 
-tsst:
+test:
 	flutter test --coverage
 	genhtml -o coverage coverage/lcov.info
