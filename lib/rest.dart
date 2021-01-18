@@ -28,7 +28,6 @@ class RestAPI {
 
   Future<String> fetchFromWappsto(String url, {Map jsonData, String session, bool patch}) async {
     url = "https://$host/services/$url";
-    print(url);
     HttpClientRequest request;
 
     if(session != null) {

@@ -4,7 +4,6 @@ import 'package:slx_snitch/models/sensor.dart';
 import 'package:slx_snitch/models/device.dart';
 import 'package:slx_snitch/models/value.dart';
 import 'package:slx_snitch/models/state.dart';
-import 'package:slx_snitch/utils/timestamp.dart';
 
 class LocationSensor extends Sensor {
   double _lastLong = 0;

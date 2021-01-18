@@ -5,6 +5,7 @@ import 'package:slx_snitch/configuration_item.dart';
 import 'package:slx_snitch/manager.dart';
 import 'package:slx_snitch/models/device.dart';
 import 'package:slx_snitch/models/value.dart';
+import 'package:slx_snitch/utils/timestamp.dart';
 
 abstract class Sensor {
   StreamSubscription subscription;
@@ -158,6 +159,10 @@ abstract class Sensor {
 
   Value getValue(String name) {
     return value.firstWhere((val) => val.name == name);
+  }
+
+  String getTimestamp() {
+    return getISOTimestamp();
   }
 
   void start();

@@ -33,7 +33,7 @@ class State extends WappstoModel {
 
   void update(String newData, {String timestamp}) {
     data = newData;
-    this.timestamp = timestamp == null ? timestamp : getTimestamp(); //DateTime.now().toUtc().toIso8601String();
+    this.timestamp = timestamp == null ? timestamp : getISOTimestamp();
   }
 
   Map<String, dynamic> toJson({bool children = true}) {
