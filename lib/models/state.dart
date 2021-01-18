@@ -1,5 +1,6 @@
 import 'package:slx_snitch/models/value.dart';
 import 'package:slx_snitch/models/wappsto_model.dart';
+import 'package:slx_snitch/utils/timestamp.dart';
 
 enum StateType {
   Report,
@@ -30,9 +31,9 @@ class State extends WappstoModel {
     );
   }
 
-  void update(String newData) {
+  void update(String newData, {String timestamp}) {
     data = newData;
-    timestamp = DateTime.now().toUtc().toIso8601String();
+    this.timestamp = timestamp == null ? timestamp : getTimestamp(); //DateTime.now().toUtc().toIso8601String();
   }
 
   Map<String, dynamic> toJson({bool children = true}) {

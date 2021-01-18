@@ -35,6 +35,7 @@ class NoiseSensor extends Sensor {
   }
 
   void onData(NoiseReading noiseReading) {
+    String timestamp = getTimestamp();
     String mean = dbToText(noiseReading.meanDecibel);
     String max = dbToText(noiseReading.maxDecibel);
     if(mean != _noiseMean || max != _noiseMax) {
@@ -42,8 +43,8 @@ class NoiseSensor extends Sensor {
       _noiseMax = max;
 
       if(noiseReading.meanDecibel.isFinite) {
-        if(update(1, noiseReading.meanDecibel.toInt())) {
-          update(0, mean);
+        if(update(1, noiseReading.meanDecibel.toInt(), timestamp: timestamp)) {
+          update(0, mean, timestamp: timestamp);
 
           text = "$mean (${noiseReading.meanDecibel.toInt().toString()} db)";
           call();
@@ -63,7 +64,7 @@ class NoiseSensor extends Sensor {
     if(name == 'Noise') {
       value = device.createStringValue(name, 'noise_meaning', 30);
       value.createState(StateType.Report, data: "SOFT");
-    } else {
+    } else if(name == 'Sound') {
       value = device.createNumberValue(name, 'sound_level', 0, 200, 1, 'db');
       value.createState(StateType.Report, data: "0");
       value.setDelta(20);

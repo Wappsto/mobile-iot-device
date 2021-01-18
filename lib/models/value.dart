@@ -189,7 +189,7 @@ class Value extends WappstoModel {
     return state;
   }
 
-  bool update(String newData) {
+  bool update(String newData, {String timestamp}) {
     State state = states.singleWhere((s) => s.type == StateType.Report, orElse: () => null);
     if(state != null) {
       var tmp = DateTime.now();
@@ -199,7 +199,7 @@ class Value extends WappstoModel {
       try {
         if(delta != null) {
           if((double.parse(newData) - double.parse(state.data)).abs() >= delta) {
-            print("Delta update: ${(double.parse(newData) - double.parse(state.data)).abs()} >= $delta");
+            //print("Delta update: ${(double.parse(newData) - double.parse(state.data)).abs()} >= $delta");
             deltaUpdate = true;
           }
         } else if(newData != state.data) {
@@ -219,10 +219,10 @@ class Value extends WappstoModel {
         print(e);
       }
 
-      state.update(newData);
+      state.update(newData, timestamp: timestamp);
 
       if(deltaUpdate || periodUpdate) {
-        print("Updating $name ($id) with $newData (${lastUpdate == null} $deltaUpdate $periodUpdate)");
+        //print("Updating $name ($id) with $newData (${lastUpdate == null} $deltaUpdate $periodUpdate)");
         state.save();
         lastUpdate = tmp;
         return true;

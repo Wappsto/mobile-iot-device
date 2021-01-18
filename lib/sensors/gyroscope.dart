@@ -17,10 +17,11 @@ class GyroscopeSensor extends Sensor {
   }
 
   void onData(GyroscopeEvent event) async {
+    String timestamp = getTimestamp();
     bool send = false;
-    send |= update(0, event.x);
-    send |= update(1, event.y);
-    send |= update(2, event.z);
+    send |= update(0, event.x, timestamp: timestamp);
+    send |= update(1, event.y, timestamp: timestamp);
+    send |= update(2, event.z, timestamp: timestamp);
 
     if(send) {
       text = "X: ${event.x.toInt()} Y: ${event.y.toInt()} Z: ${event.z.toInt()}";

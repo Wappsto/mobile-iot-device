@@ -4,6 +4,7 @@ import 'package:slx_snitch/models/sensor.dart';
 import 'package:slx_snitch/models/device.dart';
 import 'package:slx_snitch/models/value.dart';
 import 'package:slx_snitch/models/state.dart';
+import 'package:slx_snitch/utils/timestamp.dart';
 
 class LocationSensor extends Sensor {
   double _lastLong = 0;
@@ -29,8 +30,9 @@ class LocationSensor extends Sensor {
       _lastLat = position.latitude;
       _lastLong = position.longitude;
 
-      update(0, position.latitude);
-      update(1, position.longitude);
+      String timestamp = getTimestamp();
+      update(0, position.latitude, timestamp: timestamp);
+      update(1, position.longitude, timestamp: timestamp);
     }
 
     text = "${position.latitude}, ${position.longitude}";

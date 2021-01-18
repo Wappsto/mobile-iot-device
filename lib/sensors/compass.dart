@@ -22,14 +22,15 @@ class CompassSensor extends Sensor {
   }
 
   void onData(double compassValue) async {
+    String timestamp = getTimestamp();
     int cv = compassValue.toInt();
     String dir = "";
 
     dir = _headings[(compassValue + 11.25) ~/ 22.5];
 
     bool send = false;
-    send |= update(0, cv);
-    send |= update(1, dir);
+    send |= update(0, cv, timestamp: timestamp);
+    send |= update(1, dir, timestamp: timestamp);
 
     if(send) {
       text = "$dir ($cv °)";
@@ -46,7 +47,7 @@ class CompassSensor extends Sensor {
     if(name == "Compass") {
       v = device.createStringValue(name, 'bearing', 3);
       v.createState(StateType.Report, data: "N");
-    } else {
+    } else if(name == "Compass Sensor") {
       v = device.createNumberValue(name, 'angle', 0, 360, 1, '°');
       v.createState(StateType.Report, data: "0");
       v.setDelta(5);

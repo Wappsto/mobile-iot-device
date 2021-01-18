@@ -23,31 +23,25 @@ class AccelerometerSensor extends Sensor {
     );
   }
 
-  void onData(AccelerometerEvent event) async {
+  void toCSV(AccelerometerEvent event) {
     DateTime now = DateTime.now();
-
     int ticks = now.microsecondsSinceEpoch;
-    if(last != 0) {
-      diff = ticks - last;
-      if(min == 0) {
-        min = diff;
-      } else if(diff < min) {
-        min = diff;
-      }
-      if(max < diff) {
-        max = diff;
-      }
+    if(last == 0) {
+      last = ticks;
     }
-    last = ticks;
+    print("${ticks - last},${event.x},${event.y},${event.z}");
+  }
 
+  void onData(AccelerometerEvent event) async {
+    String timestamp = getTimestamp();
     bool send = false;
-    send |= update(0, event.x);
-    send |= update(1, event.y);
-    send |= update(2, event.z);
+    send |= update(0, event.x, timestamp: timestamp);
+    send |= update(1, event.y, timestamp: timestamp);
+    send |= update(2, event.z, timestamp: timestamp);
 
-    //print("Time diff: $diff Min $min Max $max");
+    //toCSV(event);
+
     if(send) {
-
       text = "X: ${event.x.toInt()} Y: ${event.y.toInt()} Z: ${event.z.toInt()}";
       call();
     }
@@ -63,5 +57,4 @@ class AccelerometerSensor extends Sensor {
     value.setDelta(0.5);
     return value;
   }
-
 }

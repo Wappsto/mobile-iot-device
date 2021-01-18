@@ -79,12 +79,12 @@ abstract class Sensor {
     }
   }
 
-  bool update(int index, var data) {
+  bool update(int index, var data, {String timestamp}) {
     bool res = false;
     value.forEach((val) {
         if(val != null &&
           val.name == _valueName[index]) {
-          res = val.update(data.toString());
+          res = val.update(data.toString(), timestamp: timestamp);
         }
     });
 
