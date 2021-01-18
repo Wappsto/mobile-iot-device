@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:slx_snitch/host.dart';
 import 'package:slx_snitch/rest.dart';
 import 'package:slx_snitch/manager.dart';
 import 'package:slx_snitch/models/session.dart';
@@ -41,6 +42,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> setup(BuildContext context) async {
     final SharedPreferences prefs = await _prefs;
+    print("Dashboard set host");
+    setHost(prefs);
     final String strSession = prefs.getString("session");
     final Session session = await RestAPI.validateSession(strSession);
     if(session == null) {
@@ -93,7 +96,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   _openWappsto() async {
-    const url = 'https://wappsto.com';
+    String url = 'https://$host';
     if (await canLaunch(url)) {
       await launch(url);
     } else {

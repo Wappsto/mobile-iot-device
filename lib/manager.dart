@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:slx_snitch/host.dart';
 import 'package:slx_snitch/rest.dart';
 import 'package:slx_snitch/wappsto.dart';
 import 'package:slx_snitch/utils/phone_info.dart';
@@ -26,7 +27,7 @@ import 'package:slx_snitch/sensors/picture.dart';
 
 
 class Manager {
-  String _host = "collector.wappsto.com";
+  String _host = "collector.$host";
   int _port = 443;
   SharedPreferences _prefs;
   List<Sensor> _sensors = List<Sensor>();

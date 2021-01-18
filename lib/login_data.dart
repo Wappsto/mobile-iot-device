@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:slx_snitch/screens/dashboard.dart';
+import 'package:slx_snitch/host.dart';
 import 'package:slx_snitch/rest.dart';
 import 'package:slx_snitch/utils/facebook_login_view.dart';
 
@@ -54,6 +55,25 @@ class LoginData extends ControllerMVC {
   static String get seluxitLink => "https://www.seluxit.com";
   static String get privacyLink => "https://www.seluxit.com/privacy";
   static String get termsLink => "https://www.seluxit.com/wp-content/uploads/2020/06/Cloud-Solutions-Terms-and-Conditions-Business.pdf";
+
+  static void switchWappstoEnv(String env) {
+    _this._prefs.then((SharedPreferences prefs) {
+        print("Switching Wappsto Env to: ${env}");
+        switch(env) {
+          case "Production":
+          prefs.setString("env", "");
+          break;
+          case "QA":
+          prefs.setString("env", "qa.");
+          break;
+          case "DEV":
+          prefs.setString("env", "dev.");
+          break;
+        }
+
+        setHost(prefs);
+    });
+  }
 
   static void changeToSignUp() {
     _this._signUpActive = true;
@@ -208,5 +228,7 @@ class LoginData extends ControllerMVC {
 
   static Future logout() async {
     await signOutGoogle();
+    SharedPreferences prefs = await _this._prefs;
+    setHost(prefs);
   }
 }

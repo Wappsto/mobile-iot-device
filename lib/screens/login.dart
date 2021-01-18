@@ -7,6 +7,7 @@ import 'package:slx_snitch/login_data.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final _emailKey = GlobalKey<FormState>();
+final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
 TextEditingController _emailController = TextEditingController();
 TextEditingController _passwordController = TextEditingController();
@@ -45,8 +46,61 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
+
+
 class _LogInPageState extends StateMVC<LogInPage> {
   _LogInPageState() : super(LoginData());
+  String wappsto_env = "Production";
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Wappsto ENV'),
+              content: SingleChildScrollView(
+                child: DropdownButton<String>(
+                  hint:  Text("Wappsto ENV"),
+                  value: wappsto_env,
+                  onChanged: (String Value) {
+                    setState(() {
+                        wappsto_env = Value;
+                    });
+                  },
+                  items: [
+                    DropdownMenuItem<String>(
+                      value: "Production",
+                      child: Text("Production")
+                    ),
+                    DropdownMenuItem<String>(
+                      value: "QA",
+                      child: Text("QA")
+                    ),
+                    DropdownMenuItem<String>(
+                      value: "DEV",
+                      child: Text("DEV")
+                    ),
+                  ]
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Save'),
+                  onPressed: () {
+                    LoginData.switchWappstoEnv(wappsto_env);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +119,14 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
-                  LoginData.displayLogoTitle,
-                  style: CustomTextStyle.title(context)
+                GestureDetector(
+                  onLongPress: () {
+                    _showMyDialog();
+                  },
+                  child: Text(
+                    LoginData.displayLogoTitle,
+                    style: CustomTextStyle.title(context)
+                  ),
                 ),
                 Text(
                   LoginData.displayLogoSubTitle,
@@ -324,15 +383,15 @@ class _LogInPageState extends StateMVC<LogInPage> {
                     'Signin',
                     res
                   );
-/*
+                  /*
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context){
-                        return Captcha(title: "Captcha Check", callback: (String code)=>print("Code returned: "+code));
-                      }
-                    ),
-                  );
-*/
+                  MaterialPageRoute(
+                  builder: (context){
+                  return Captcha(title: "Captcha Check", callback: (String code)=>print("Code returned: "+code));
+                }
+                ),
+                );
+                  */
                 }
               },
             )
@@ -545,8 +604,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
       ],
     );
   }
-
-  final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
   void _showLoading() {
     showDialog<void>(

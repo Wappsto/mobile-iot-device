@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:slx_snitch/host.dart';
 import 'package:slx_snitch/models/network.dart';
 import 'package:slx_snitch/models/session.dart';
 import 'package:slx_snitch/models/creator.dart';
-
-final String host = 'https://wappsto.com/services';
 
 class RestException implements Exception {
   String message;
@@ -18,8 +17,18 @@ class RestException implements Exception {
 }
 
 class RestAPI {
-  static Future<String> fetchFromWappsto(String url, {Map jsonData, String session, bool patch}) async {
-    final client = new HttpClient();
+  static final RestAPI _instance = RestAPI._internal();
+  HttpClient client = HttpClient();
+
+  factory RestAPI() {
+    return _instance;
+  }
+
+  RestAPI._internal();
+
+  Future<String> fetchFromWappsto(String url, {Map jsonData, String session, bool patch}) async {
+    url = "https://$host/services/$url";
+    print(url);
     HttpClientRequest request;
 
     if(session != null) {
@@ -50,7 +59,6 @@ class RestAPI {
 
     HttpClientResponse response = await request.close();
     final body = await utf8.decoder.bind(response).join();
-
     if (response.statusCode == 200 || response.statusCode == 201) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -58,34 +66,42 @@ class RestAPI {
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
-      throw RestException("Failed to load data from Wappsto ${response.statusCode}: $url", json.decode(body)['message']);
+      try {
+        throw RestException("Failed to load data from Wappsto ${response.statusCode}: $url", json.decode(body)['message']);
+      } catch(e) {
+        throw RestException("Failed to load data from Wappsto ${response.statusCode}: $url", body);
+      }
     }
   }
 
   static Future<Session> fetchSession(String username, String password) async {
-    String url = "$host/2.1/session";
+    String url = "2.1/session";
     Map jsonData = {
       'username': username,
       'password': password,
       'remember_me': true
     };
-    final data = await fetchFromWappsto(url, jsonData: jsonData);
-    return Session.fromJson(json.decode(data));
+    final data = await RestAPI().fetchFromWappsto(url, jsonData: jsonData);
+    try {
+      return Session.fromJson(json.decode(data));
+    } catch(e) {
+      return null;
+    }
   }
 
   static Future<Session> firebaseSession(String token) async {
-    String url = "$host/2.1/session";
+    String url = "2.1/session";
     Map jsonData = {
       'firebase_token': token
     };
-    final data = await fetchFromWappsto(url, jsonData: jsonData);
+    final data = await RestAPI().fetchFromWappsto(url, jsonData: jsonData);
     return Session.fromJson(json.decode(data));
   }
 
   static Future<List<Creator> > fetchCreator(Session session) async {
-    String url = "$host/2.1/creator?expand=1";
+    String url = "2.1/creator?expand=1";
 
-    final data = await fetchFromWappsto(url, session: session.id);
+    final data = await RestAPI().fetchFromWappsto(url, session: session.id);
     final list = json.decode(data);
 
     List<Creator> creators = new List<Creator>();
@@ -96,19 +112,19 @@ class RestAPI {
   }
 
   static Future<Creator> createCreator(Session session, String product) async {
-    String url = "$host/2.1/creator";
+    String url = "2.1/creator";
     Map jsonData = {
       'product': product
     };
-    final data = await fetchFromWappsto(url, jsonData: jsonData, session: session.id);
+    final data = await RestAPI().fetchFromWappsto(url, jsonData: jsonData, session: session.id);
     return Creator.fromJson(json.decode(data));
   }
 
   static Future<Session> validateSession(String id) async {
-    String url = "$host/2.0/session/$id";
+    String url = "2.0/session/$id";
 
     try {
-      final data = await fetchFromWappsto(url, session: id);
+      final data = await RestAPI().fetchFromWappsto(url, session: id);
       return Session.fromJson(json.decode(data));
     } catch(e) {
       print("Session is not valid");
@@ -118,7 +134,7 @@ class RestAPI {
   }
 
   static Future<String> signup(String email, String password) async {
-    String url = "$host/2.1/register";
+    String url = "2.1/register";
 
     Map jsonData = {
       'username': email,
@@ -126,8 +142,7 @@ class RestAPI {
     };
 
     try {
-      final data = await fetchFromWappsto(url, jsonData: jsonData);
-      print(data);
+      await RestAPI().fetchFromWappsto(url, jsonData: jsonData);
       return "ok";
     } catch(e) {
       print("Failed to signup to wappsto");
@@ -138,14 +153,14 @@ class RestAPI {
   }
 
   static Future<String> resetPassword(String email) async {
-    String url = "$host/2.1/register/recovery_password";
+    String url = "2.1/register/recovery_password";
 
     Map jsonData = {
       'username': email
     };
 
     try {
-      final data = await fetchFromWappsto(url, jsonData: jsonData, patch: true);
+      final data = await RestAPI().fetchFromWappsto(url, jsonData: jsonData, patch: true);
       return json.decode(data)['message'];
     } catch(e) {
       print("Failed to recover password");
@@ -156,12 +171,12 @@ class RestAPI {
   }
 
   static Future<String> claimNetwork(String session, String network) async {
-    String url = "$host/2.0/network/$network";
+    String url = "2.0/network/$network";
 
     Map jsonData = {};
 
     try {
-      final data = await fetchFromWappsto(url, session: session, jsonData: jsonData);
+      final data = await RestAPI().fetchFromWappsto(url, session: session, jsonData: jsonData);
       return data;
     } catch(e) {
       print("Failed to claim network");
@@ -172,9 +187,9 @@ class RestAPI {
   }
 
   static Future<List<Network> > fetchNetworks(String session) async {
-    String url = "$host/2.0/network?expand=1";
+    String url = "2.0/network?expand=1";
 
-    final data = await fetchFromWappsto(url, session: session);
+    final data = await RestAPI().fetchFromWappsto(url, session: session);
     final list = json.decode(data);
 
     List<Network> networks = new List<Network>();
@@ -186,9 +201,9 @@ class RestAPI {
   }
 
   static Future<Network> fetchNetwork(String session, String network) async {
-    String url = "$host/2.0/network/$network";
+    String url = "2.0/network/$network";
 
-    final data = await fetchFromWappsto(url, session: session);
+    final data = await RestAPI().fetchFromWappsto(url, session: session);
     Map<String, dynamic> j = json.decode(data);
 
     j.removeWhere((key, value) => key == "device");
@@ -196,9 +211,9 @@ class RestAPI {
   }
 
   static Future<Network> fetchFullNetwork(String session, String network, var wappsto) async {
-    String url = "$host/2.0/network/$network?expand=5";
+    String url = "2.0/network/$network?expand=5";
 
-    final data = await fetchFromWappsto(url, session: session);
+    final data = await RestAPI().fetchFromWappsto(url, session: session);
     Map<String, dynamic> j = json.decode(data);
 
     return Network.fromJson(j, wappsto);
