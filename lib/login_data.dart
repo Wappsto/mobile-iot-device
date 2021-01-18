@@ -63,6 +63,9 @@ class LoginData extends ControllerMVC {
           case "Production":
           prefs.setString("env", "");
           break;
+          case "Staging":
+          prefs.setString("env", "staging");
+          break;
           case "QA":
           prefs.setString("env", "qa.");
           break;

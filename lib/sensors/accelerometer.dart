@@ -6,11 +6,6 @@ import 'package:slx_snitch/models/value.dart';
 import 'package:slx_snitch/models/state.dart';
 
 class AccelerometerSensor extends Sensor {
-  int last = 0;
-  int diff = 0;
-  int min = 0;
-  int max = 0;
-
   AccelerometerSensor() {
     icon = Icons.all_out;
     name = "Accelerometer";

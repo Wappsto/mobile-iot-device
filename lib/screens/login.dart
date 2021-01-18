@@ -65,15 +65,19 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 child: DropdownButton<String>(
                   hint:  Text("Wappsto ENV"),
                   value: wappstoEnv,
-                  onChanged: (String Value) {
+                  onChanged: (String value) {
                     setState(() {
-                        wappstoEnv = Value;
+                        wappstoEnv = value;
                     });
                   },
                   items: [
                     DropdownMenuItem<String>(
                       value: "Production",
                       child: Text("Production")
+                    ),
+                    DropdownMenuItem<String>(
+                      value: "Staging",
+                      child: Text("Staging")
                     ),
                     DropdownMenuItem<String>(
                       value: "QA",

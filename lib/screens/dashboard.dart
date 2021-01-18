@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:slx_snitch/host.dart';
 import 'package:slx_snitch/rest.dart';
-import 'package:slx_snitch/manager.dart';
 import 'package:slx_snitch/models/session.dart';
 import 'package:slx_snitch/screens/login.dart';
 import 'package:slx_snitch/screens/sensorview.dart';
@@ -23,21 +22,12 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  Manager _manager;
 
   @override
   void initState() {
     super.initState();
 
     setup(context);
-  }
-
-  @override
-  void dispose() {
-    if(_manager != null) {
-      _manager.stop();
-    }
-    super.dispose();
   }
 
   Future<void> setup(BuildContext context) async {
@@ -160,10 +150,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final List<String> ids = prefs.getStringList("creator_ids");
     prefs.clear();
     prefs.setStringList("creator_ids", ids);
-
-    if(_manager != null) {
-      _manager.stop();
-    }
 
     LoginScreen.logout();
 
